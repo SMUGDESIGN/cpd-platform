@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { requireInternal } from '@/lib/session';
+import { requireInternal, requireCaseEditor } from '@/lib/session';
+import { notifyProviderOfCaseChanges } from '@/lib/caseEvents.server';
 
 export async function GET(_req, { params }) {
   const { session, res } = await requireInternal();
@@ -18,7 +19,7 @@ export async function GET(_req, { params }) {
    version the client READ. A stale version is refused with the current row
    so the client can show what happened rather than overwrite a colleague. */
 export async function PUT(req, { params }) {
-  const { session, res } = await requireInternal();
+  const { session, res } = await requireCaseEditor();
   if (res) return res;
   const body = await req.json().catch(() => null);
   const doc = body?.doc;
@@ -27,7 +28,7 @@ export async function PUT(req, { params }) {
   }
   const expected = Number(body.version);
   const out = await withTransaction(async (tx) => {
-    const { rows: cur } = await tx('SELECT version, updated_by FROM entries WHERE id = $1 AND archived_at IS NULL FOR UPDATE', [params.id]);
+    const { rows: cur } = await tx('SELECT version, updated_by, doc, org_id, ref FROM entries WHERE id = $1 AND archived_at IS NULL FOR UPDATE', [params.id]);
     if (!cur[0]) return { status: 404 };
     if (Number.isFinite(expected) && cur[0].version !== expected) {
       const { rows: who } = await tx('SELECT name FROM users WHERE id = $1', [cur[0].updated_by]);
@@ -43,18 +44,21 @@ export async function PUT(req, { params }) {
     );
     await tx('INSERT INTO entry_versions (entry_id, version, doc, saved_by) VALUES ($1, $2, $3, $4)',
       [params.id, next, JSON.stringify(doc), session.user.id]);
-    return { status: 200, version: next };
+    return { status: 200, version: next, before: cur[0].doc, orgId: cur[0].org_id, ref: doc.caseInfo.ref || cur[0].ref };
   });
   if (out.status === 404) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (out.status === 409) {
     return NextResponse.json({ error: 'Saved elsewhere since you opened it', current: out.current, by: out.by }, { status: 409 });
   }
+  /* after the commit: tell the provider what has changed for them, if anything */
+  try { await notifyProviderOfCaseChanges({ entryId: params.id, ref: out.ref, orgId: out.orgId, before: out.before, after: doc, actorId: session.user.id }); }
+  catch (e) { console.error('notify after save failed', e); }
   return NextResponse.json({ id: params.id, version: out.version });
 }
 
 /* Archive, never delete: the row and its history stay. */
 export async function DELETE(_req, { params }) {
-  const { session, res } = await requireInternal();
+  const { session, res } = await requireCaseEditor();
   if (res) return res;
   const { rowCount } = await query(
     'UPDATE entries SET archived_at = now(), updated_by = $2 WHERE id = $1 AND archived_at IS NULL',

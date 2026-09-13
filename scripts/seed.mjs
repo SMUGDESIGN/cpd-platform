@@ -1,6 +1,7 @@
 // Create (or reset) one account and print a one-time password.
 //   npm run seed "Paul Grantham" you@example.org [role]
-// Roles: admin | assessor | moderator | coordinator (lib/permissions.js).
+// Roles: superadmin | support | assessor | moderator | coordinator (lib/permissions.js).
+// The first account you seed should be a superadmin.
 // The password is printed once and never stored in clear; change it under
 // Account after the first sign-in.
 import 'dotenv/config';
@@ -8,7 +9,7 @@ import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import pg from 'pg';
 
-const [name, emailRaw, role = 'admin'] = process.argv.slice(2);
+const [name, emailRaw, role = 'superadmin'] = process.argv.slice(2);
 if (!name || !emailRaw) {
   console.error('usage: npm run seed "Full Name" email@example.org [role]');
   process.exit(1);

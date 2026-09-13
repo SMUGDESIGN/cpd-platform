@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireInternal } from '@/lib/session';
+import { notify } from '@/lib/notify.server';
 
 /* Link a case to this provider (cases opened in the tool before the portal
    existed have no owner). The case's provider name is set from the
@@ -20,5 +21,7 @@ export async function POST(req, { params }) {
       WHERE id = $1 AND archived_at IS NULL AND org_id IS NULL`, [entryId, id, org.name, session.user.id]
   );
   if (!rowCount) return NextResponse.json({ error: 'That case is not available to assign' }, { status: 409 });
+  const { rows: e } = await query('SELECT ref, activity FROM entries WHERE id = $1', [entryId]);
+  await notify({ to: { orgId: id }, kind: 'system', title: (e[0]?.ref || 'A case') + ' is now on your portal', body: (e[0]?.activity || '') + ' - follow its progress under Overview.', href: '/portal/cases/' + encodeURIComponent(entryId), orgId: id, entryId });
   return NextResponse.json({ ok: true });
 }

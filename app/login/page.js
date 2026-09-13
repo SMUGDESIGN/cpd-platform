@@ -49,7 +49,7 @@ function LoginForm() {
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-        <p className="muted">Forgotten your password? An admin can reset it from the command line for now.</p>
+        <p className="muted">Forgotten your password? Support can reset it for you.</p>
       </div>
     </div>
   );

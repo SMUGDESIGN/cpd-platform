@@ -12,9 +12,18 @@ export default function Admin() {
   const load = useCallback(() => fetch('/api/admin/overview').then((r) => (r.ok ? r.json() : Promise.reject(r.status))).then(setD).catch((e) => setErr('Could not load (' + e + ').')), []);
   useEffect(() => { load(); }, [load]);
   async function seen(ids) { await fetch('/api/admin/events', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ids }) }); load(); }
+  const [cron, setCron] = useState('');
+  async function runChecks() {
+    setCron('Running…');
+    const r = await fetch('/api/admin/cron', { method: 'POST' });
+    const x = await r.json().catch(() => ({}));
+    setCron(r.ok ? `Checked ${x.entries} cases and ${x.overdueInvoices} overdue invoices; ${x.notificationsWritten} new notification${x.notificationsWritten === 1 ? '' : 's'}.` : (x.error || 'Failed.'));
+    window.dispatchEvent(new Event('cpd:notifications'));
+  }
   return (
     <AppLayout>
-      <div className="page-head"><h1>Admin</h1><nav className="subnav"><Link href="/admin/organisations">Organisations</Link><Link href="/admin/users">People</Link></nav></div>
+      <div className="page-head"><h1>Admin</h1><nav className="subnav"><Link href="/admin/organisations">Organisations</Link><Link href="/admin/users">People</Link><button type="button" className="btn btn--tiny" onClick={runChecks} title="Fix windows ending, conditions overdue, reviews due, invoices overdue - what the nightly job does on Vercel">Run daily checks</button></nav></div>
+      {cron && <div className="alert alert--ok">{cron}</div>}
       {err && <div className="alert alert--error">{err}</div>}
       {d && (
         <>

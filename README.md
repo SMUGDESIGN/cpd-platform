@@ -31,6 +31,11 @@ at http://localhost:3006 and change the password under Account.
 
 Ports: app 3006, Postgres 5545 (the DBF Hub holds 3005 and 5544 - never share).
 
+Daily checks (fix windows, conditions, reviews, invoices -> notifications): on
+Vercel the cron in `vercel.json` calls `/api/cron/daily` with `CRON_SECRET`;
+locally use the Admin page's "Run daily checks" or `npm run cron`. Notifications
+are in-app only for now; `notifications.email_sent_at` is the hook for email.
+
 The database is a real Postgres running from `node_modules` into `.pgdata/`.
 Deploying later means: a GitHub repo, a Vercel project, a managed Postgres
 (Neon), and `DATABASE_URL` / `NEXTAUTH_SECRET` / `NEXTAUTH_URL` set in Vercel.

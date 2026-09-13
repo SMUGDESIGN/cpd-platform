@@ -9,7 +9,8 @@
     "build:check": "NEXT_DIST_DIR=.next-verify next build",
     "start": "next start -p 3006",
     "migrate": "node scripts/migrate.mjs",
-    "seed": "node scripts/seed.mjs"
+    "seed": "node scripts/seed.mjs",
+    "cron": "node scripts/cron.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

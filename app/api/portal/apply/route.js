@@ -3,6 +3,7 @@ import { query, withTransaction } from '@/lib/db';
 import { requireProvider } from '@/lib/session';
 import { blankDoc } from '@/lib/framework';
 import { nextRef } from '@/lib/refs.server';
+import { notify } from '@/lib/notify.server';
 
 /* A new application. Creates the case in exactly the tool's document shape
    with the facts the provider gave, a reference minted here, and the
@@ -40,5 +41,6 @@ export async function POST(req) {
     await tx('INSERT INTO portal_events (org_id, entry_id, kind, message, by_user) VALUES ($1,$2,$3,$4,$5)', [orgId, id, 'submitted', 'New application: ' + activity, session.user.id]);
     return { id, ref };
   });
+  await notify({ to: { internal: true }, kind: 'application', title: out.ref + ': new application from ' + org.name, body: activity + ' - ' + hours + ' CPD hours. Stage 1 completeness check to run.', href: '/tool?entry=' + encodeURIComponent(out.id), entryId: out.id, orgId });
   return NextResponse.json(out, { status: 201 });
 }

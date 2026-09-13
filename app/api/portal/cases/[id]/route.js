@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
 import { requireProvider } from '@/lib/session';
 import { providerView, askKeys } from '@/lib/providerView';
+import { notify } from '@/lib/notify.server';
 
 async function ownRow(id, orgId) {
   const { rows } = await query('SELECT id, ref, doc, summary, version, created_at, updated_at FROM entries WHERE id = $1 AND org_id = $2 AND archived_at IS NULL', [id, orgId]);
@@ -63,9 +64,12 @@ export async function POST(req, { params }) {
     await tx('UPDATE entries SET doc = $2, version = $3, updated_at = now() WHERE id = $1', [row.id, JSON.stringify(doc), next]);
     await tx('INSERT INTO entry_versions (entry_id, version, doc, saved_by) VALUES ($1, $2, $3, $4)', [row.id, next, JSON.stringify(doc), session.user.id]);
     await tx('INSERT INTO portal_events (org_id, entry_id, kind, message, by_user) VALUES ($1,$2,$3,$4,$5)', [orgId, row.id, kind, message, session.user.id]);
-    return { status: 200 };
+    const { rows: ref } = await tx('SELECT ref FROM entries WHERE id = $1', [row.id]);
+    return { status: 200, ref: ref[0]?.ref, message };
   });
   if (out.status !== 200) return NextResponse.json({ error: out.error }, { status: out.status });
+  /* the assessors hear about it where they work */
+  await notify({ to: { internal: true }, kind: 'provider_reply', title: (out.ref || 'a case') + ': ' + (session.user.orgName || 'provider') + ' replied', body: out.message, href: '/tool?entry=' + encodeURIComponent(params.id), entryId: params.id, orgId });
   const row = await ownRow(params.id, orgId);
   return NextResponse.json({ ok: true, view: providerView(row) });
 }

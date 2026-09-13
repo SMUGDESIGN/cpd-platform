@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { requireInternal } from '@/lib/session';
+import { requireInternal, requireCaseEditor } from '@/lib/session';
 
 /* The caseload. Listing fields only - the document itself comes from
    /api/entries/[id] or, for the tool's boot, /api/store. */
@@ -21,7 +21,7 @@ export async function GET() {
    tool's own if it sends one (so an imported JSON file keeps its identity),
    else minted here in the same shape. */
 export async function POST(req) {
-  const { session, res } = await requireInternal();
+  const { session, res } = await requireCaseEditor();
   if (res) return res;
   const body = await req.json().catch(() => null);
   const doc = body?.doc;

@@ -29,6 +29,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    '/((?!login(?:/|$)|verify(?:/|$)|feedback(?:/|$)|api/auth(?:/|$)|api/verify(?:/|$)|api/feedback(?:/|$)|_next/static|_next/image|favicon.ico|icon.svg|images/).*)',
+    '/((?!login(?:/|$)|verify(?:/|$)|feedback(?:/|$)|api/auth(?:/|$)|api/verify(?:/|$)|api/feedback(?:/|$)|api/cron(?:/|$)|_next/static|_next/image|favicon.ico|icon.svg|images/).*)',
   ],
 };

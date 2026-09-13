@@ -4,8 +4,9 @@
 -- as the DBF Hub's schema.sql.
 
 -- ---------------------------------------------------------------------------
--- People who sign in. Roles are a single column for now (lib/permissions.js):
--- admin | assessor | moderator | coordinator. Deactivate, never delete - a
+-- People who sign in. Roles are a single column (lib/permissions.js):
+-- superadmin | support | assessor | moderator | coordinator | provider.
+-- ('admin' was renamed 'support' on 13 Sep 2026; the UPDATE below is idempotent.) Deactivate, never delete - a
 -- signed decision names a person, and that name must always resolve.
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -224,3 +225,33 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_feedback_email ON feedback_responses(acc_re
 -- 'withdrawn' set by the scheme under D4. Read by the public verify lookup.
 ALTER TABLE entries ADD COLUMN IF NOT EXISTS register_status TEXT;
 ALTER TABLE entries ADD COLUMN IF NOT EXISTS register_note TEXT;
+
+-- ---------------------------------------------------------------------------
+-- NOTIFICATIONS (added 13 Sep 2026). In-app for now; email later.
+--
+-- One row per RECIPIENT: an event that concerns three people is three rows,
+-- fanned out when it happens (lib/notify.server.js), so read state is per
+-- person and a query is always "mine, unread". `dedupe_key` stops the daily
+-- checks repeating themselves ("fix window ends in 7 days" once, not every
+-- morning). `email_sent_at` is the hook for the email route when it comes:
+-- a sender picks up rows where it is NULL and the person has asked for email.
+CREATE TABLE IF NOT EXISTS notifications (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL,                  -- 'application' | 'provider_reply' | 'returned' | 'ask' | 'deferral' | 'decision' | 'issued' | 'condition' | 'review' | 'invoice' | 'feedback' | 'system'
+  title TEXT NOT NULL,
+  body TEXT,
+  href TEXT,                           -- where clicking it goes, on the recipient's side of the house
+  entry_id TEXT REFERENCES entries(id) ON DELETE SET NULL,
+  org_id INTEGER REFERENCES organisations(id) ON DELETE SET NULL,
+  dedupe_key TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  read_at TIMESTAMPTZ,
+  email_sent_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, created_at DESC) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_notifications_dedupe ON notifications(user_id, dedupe_key) WHERE dedupe_key IS NOT NULL;
+
+-- 13 Sep 2026: the 'admin' role became 'support' (accounts), and 'superadmin' was added (everything).
+UPDATE users SET role = 'support' WHERE role = 'admin';

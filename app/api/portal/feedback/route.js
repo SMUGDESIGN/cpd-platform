@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireProvider } from '@/lib/session';
+import { notify } from '@/lib/notify.server';
 
 export async function GET() {
   const { orgId, res } = await requireProvider();
@@ -28,5 +29,6 @@ export async function POST(req) {
   if (!rows[0]) return NextResponse.json({ error: 'Not found, or already acknowledged' }, { status: 404 });
   await query('INSERT INTO portal_events (org_id, entry_id, kind, message, by_user) VALUES ($1,$2,$3,$4,$5)',
     [orgId, rows[0].entry_id, 'feedback_ack', 'Feedback acknowledged: ' + response.slice(0, 200), session.user.id]);
+  await notify({ to: { internal: true }, kind: 'feedback', title: (session.user.orgName || 'A provider') + ' responded to shared feedback', body: response.slice(0, 300), href: rows[0].entry_id ? '/learner-feedback' : '/admin/organisations/' + orgId, entryId: rows[0].entry_id, orgId });
   return NextResponse.json({ ok: true });
 }
