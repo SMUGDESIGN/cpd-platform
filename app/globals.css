@@ -199,6 +199,11 @@ span.bad{color:var(--bad); font-weight:600;}
 .calc__grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;} .calc__grid div{border:1px solid var(--line); padding:8px 10px;} .calc__grid span{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--ink-3);} .calc__grid b{font-size:18px;} .calc__grid b.bad{color:var(--bad);} .calc__grid b.ok{color:var(--ok);}
 @media (max-width:760px){.calc__grid{grid-template-columns:1fr 1fr;}}
 
+/* view-as strip (superadmin testing) */
+.viewas{background:var(--lilac-tint); border-bottom:2px solid var(--lilac); font-size:13px;} .viewas.on{background:var(--warn-soft); border-bottom-color:var(--warn);}
+.viewas__inner{max-width:1240px; margin:0 auto; padding:6px 22px; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+.viewas__ctl{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+
 /* notifications */
 .bell{position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:2px solid rgba(255,255,255,.35); color:#fff; text-decoration:none; font-size:16px;}
 .bell.has{border-color:var(--teal);} .bell b{position:absolute; top:-8px; right:-8px; min-width:18px; height:18px; padding:0 5px; background:var(--teal); color:var(--navy); font-size:11px; line-height:18px; text-align:center; border-radius:0;}

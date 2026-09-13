@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import Bell from './Bell';
+import ViewAs from './ViewAs';
 
 /* Two houses, one shell. Staff see the caseload and the tool; providers see
    their portal. The nav is decided by the role on the session, and a person
@@ -70,6 +71,7 @@ export default function AppLayout({ children, wide }) {
           <button type="button" className="btn btn--ghost" onClick={() => signOut({ callbackUrl: '/login' })}>Sign out</button>
         </div>
       </header>
+      <ViewAs />
       <main className={wide ? 'container container--wide' : 'container'} id="main-content" tabIndex={-1}>{children}</main>
     </div>
   );
