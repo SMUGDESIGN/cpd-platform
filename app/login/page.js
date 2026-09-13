@@ -1,14 +1,16 @@
 'use client';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+  const params = useSearchParams();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -16,8 +18,11 @@ export default function LoginPage() {
     setBusy(true);
     const res = await signIn('credentials', { redirect: false, email, password });
     setBusy(false);
-    if (res?.error) setError('Invalid email or password.');
-    else router.push('/dashboard');
+    if (res?.error) { setError('Invalid email or password.'); return; }
+    /* Back to the page that sent us here - same-origin paths only, so a
+       crafted link cannot bounce a fresh sign-in off to another site. */
+    const back = params.get('callbackUrl') || '';
+    router.push(back.startsWith('/') && !back.startsWith('//') ? back : '/dashboard');
   }
 
   return (
@@ -48,4 +53,8 @@ export default function LoginPage() {
       </div>
     </div>
   );
+}
+
+export default function LoginPage() {
+  return <Suspense fallback={null}><LoginForm /></Suspense>;
 }
