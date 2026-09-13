@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.next-verify/
+.env
+.pgdata/
+.uploads/
+*.log
+
+# Finder droppings
+.DS_Store

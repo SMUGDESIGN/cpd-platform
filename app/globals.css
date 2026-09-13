@@ -1,0 +1,79 @@
+/* CPD Accreditation Scheme - platform shell.
+   Brand tokens as the public site (css/style.css in ~/Documents/CPD website):
+   navy, translucent lilac, bright teal for actions, deep teal for positive
+   states, square corners everywhere (Paul's call, July 2026). */
+:root{
+  --navy:#211A5E; --lilac:#9A94D0; --lilac-tint:#EFEEF8; --lilac-tint-2:#E3E1F1;
+  --teal:#00D2C4; --ok:#0A7A6E; --ok-soft:#DEF4F1;
+  --warn:#B7791F; --warn-soft:#FFF6E0; --bad:#B3261E; --bad-soft:#FBE9E7;
+  --ink:#1B1B2F; --ink-2:#3E3E5A; --ink-3:#6B6B85; --line:#D9D8E6; --surface:#FFFFFF; --paper:#F6F5FB;
+  --radius:0;
+}
+*{box-sizing:border-box;}
+html,body{margin:0; padding:0;}
+body{font-family:'Space Grotesk',system-ui,-apple-system,Segoe UI,sans-serif; font-size:15px; line-height:1.5; color:var(--ink); background:var(--paper);}
+h1{font-size:26px; margin:0 0 14px; color:var(--navy); letter-spacing:-.2px;}
+h2{font-size:18px; margin:0 0 10px; color:var(--navy);}
+a{color:var(--navy);}
+.muted{color:var(--ink-3);}
+.nowrap{white-space:nowrap;}
+
+.skip-link{position:absolute; left:-999px; top:8px; background:var(--navy); color:#fff; padding:8px 12px;}
+.skip-link:focus{left:8px; z-index:50;}
+
+.app-shell{min-height:100vh; display:flex; flex-direction:column;}
+.topbar{display:flex; align-items:center; gap:28px; padding:10px 22px; background:var(--navy); color:#fff; border-bottom:4px solid var(--lilac);}
+.topbar a{color:#fff; text-decoration:none;}
+.brand-lockup{display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;}
+.brand-mark{font-weight:700; font-size:22px; letter-spacing:1px; padding:4px 8px; border:2px solid var(--lilac); color:#fff;}
+.brand-words{font-weight:600; line-height:1.15; font-size:14px;}
+.brand-words small{display:block; font-weight:400; font-size:11.5px; color:var(--lilac); text-transform:uppercase; letter-spacing:1px;}
+.brand-lockup--bar .brand-words small{display:inline; margin-left:8px;}
+.topnav{display:flex; gap:4px; flex:1;}
+.topnav a{padding:8px 12px; font-weight:600; font-size:14px; border-bottom:3px solid transparent;}
+.topnav a.on{border-bottom-color:var(--teal);}
+.topnav a:hover{background:rgba(255,255,255,.08);}
+.topbar__user{display:flex; align-items:center; gap:12px; font-size:13.5px;}
+
+.container{width:100%; max-width:1240px; margin:0 auto; padding:26px 22px 60px;}
+.page-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;}
+.page-head h1{margin:0;}
+.panel{background:var(--surface); border:2px solid var(--line); padding:18px 20px; margin-bottom:16px;}
+.panel--table{padding:0; overflow-x:auto;}
+.table{width:100%; border-collapse:collapse; font-size:13.5px;}
+.table th{text-align:left; background:var(--lilac-tint); color:var(--navy); font-size:11.5px; letter-spacing:.8px; text-transform:uppercase; padding:10px 12px; border-bottom:2px solid var(--line);}
+.table td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
+.table tr:last-child td{border-bottom:0;}
+.ref{font-weight:700; color:var(--navy);}
+.stages{display:flex; gap:3px;}
+.sq{width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:var(--lilac-tint-2); color:var(--ink-3);}
+.sq.pass{background:var(--ok); color:#fff;} .sq.act{background:var(--bad); color:#fff;} .sq.sent{background:var(--warn); color:#fff;}
+.status{display:inline-block; padding:3px 9px; font-size:12px; font-weight:700; border:2px solid var(--line); color:var(--ink-2);}
+.status.ok{border-color:var(--ok); color:var(--ok); background:var(--ok-soft);}
+.status.warn{border-color:var(--warn); color:#7a4f0e; background:var(--warn-soft);}
+.status.bad{border-color:var(--bad); color:var(--bad); background:var(--bad-soft);}
+
+.btn{display:inline-flex; align-items:center; gap:6px; font:inherit; font-weight:700; font-size:14px; padding:9px 16px; border:2px solid var(--navy); background:var(--surface); color:var(--navy); cursor:pointer; text-decoration:none;}
+.btn--primary{background:var(--teal); border-color:var(--teal); color:var(--navy);}
+.btn--primary:hover{filter:brightness(.95);}
+.btn--ghost{background:transparent; border-color:rgba(255,255,255,.5); color:#fff; padding:6px 12px; font-size:13px;}
+.btn--block{width:100%; justify-content:center;}
+.btn:disabled{opacity:.55; cursor:not-allowed;}
+
+.field{margin-bottom:14px;}
+.field label{display:block; font-weight:600; font-size:13px; margin-bottom:5px; color:var(--ink-2);}
+.input{width:100%; font:inherit; padding:10px 12px; border:2px solid var(--line); background:var(--surface); color:var(--ink);}
+.input:focus{outline:2px solid var(--teal); outline-offset:0; border-color:var(--navy);}
+.form-narrow{max-width:420px;}
+.alert{padding:10px 12px; border:2px solid var(--line); margin-bottom:12px; font-size:13.5px;}
+.alert--error{border-color:var(--bad); background:var(--bad-soft); color:var(--ink);}
+.alert--ok{border-color:var(--ok); background:var(--ok-soft); color:var(--ink);}
+
+.login-wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:24px;
+  background-image:linear-gradient(135deg, rgba(154,148,208,.25) 0 38%, transparent 38%);}
+.login-card{width:100%; max-width:400px; background:var(--surface); border:2px solid var(--lilac); padding:28px 28px 22px;}
+.login-card .brand-lockup{margin-bottom:22px; color:var(--navy);}
+.login-card .brand-mark{border-color:var(--navy); color:var(--navy);}
+.login-card .brand-words small{color:var(--ink-3);}
+.login-card h1{font-size:22px; margin-bottom:16px;}
+.login-card .muted{font-size:12.5px; margin:16px 0 0;}

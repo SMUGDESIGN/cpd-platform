@@ -1,0 +1,29 @@
+{
+  "name": "cpd-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "db": "node scripts/db.mjs",
+    "build": "next build",
+    "build:check": "NEXT_DIST_DIR=.next-verify next build",
+    "start": "next start -p 3006",
+    "migrate": "node scripts/migrate.mjs",
+    "seed": "node scripts/seed.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "next": "^14.2.5",
+    "next-auth": "^4.24.7",
+    "pg": "^8.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "embedded-postgres": "18.4.0-beta.17"
+  },
+  "allowScripts": {
+    "@embedded-postgres/darwin-arm64@18.4.0-beta.17": true
+  }
+}
