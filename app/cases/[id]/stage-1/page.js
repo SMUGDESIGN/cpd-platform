@@ -5,7 +5,8 @@ import { useSession } from 'next-auth/react';
 import AppLayout from '../../../AppLayout';
 import CaseShell from '../../CaseShell';
 import { useCase } from '../../useCase';
-import { stage1Items, stage1ReturnInfo, stage1Status, stage1Progress, summaryAfterStage1, composeReturnEmail } from '@/lib/stage1';
+import { stage1Items, stage1ReturnInfo, stage1Status, stage1Progress, composeReturnEmail } from '@/lib/stage1';
+import { summarise } from '@/lib/scoring';
 import { when } from '../../../money';
 
 /* Stage 1 - submission and completeness check.
@@ -18,7 +19,7 @@ import { when } from '../../../money';
 export default function Stage1() {
   const { id } = useParams();
   const { data: session } = useSession();
-  const { row, doc, refinements, err, saveState, failed, update, saveRefinements, reload } = useCase(id, summaryAfterStage1);
+  const { row, doc, refinements, err, saveState, failed, update, saveRefinements, reload } = useCase(id, summarise);
   const [mail, setMail] = useState(null);
   const [copied, setCopied] = useState('');
   const [refine, setRefine] = useState(null); // {id, text, reason}

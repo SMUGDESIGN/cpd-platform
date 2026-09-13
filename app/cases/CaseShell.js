@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
    here; the rest still open in the framed tool until they move. */
 export const STAGES = [
   { n: 1, name: 'Submission & completeness', page: true },
-  { n: 2, name: 'Desk review & scoring' }, { n: 3, name: 'Live verification' }, { n: 4, name: 'Independent derivations' },
+  { n: 2, name: 'Desk review & scoring', page: true }, { n: 3, name: 'Live verification' }, { n: 4, name: 'Independent derivations' },
   { n: 5, name: 'Moderation' }, { n: 6, name: 'Decision & remediation' }, { n: 7, name: 'Outcome' }, { n: 8, name: 'Surveillance & renewal' },
 ];
 
