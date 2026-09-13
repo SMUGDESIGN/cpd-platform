@@ -155,6 +155,11 @@ code{background:var(--lilac-tint); padding:2px 6px; font-size:13px;}
 .drawer__head{display:flex; justify-content:space-between; align-items:flex-start;} .drawer__head small{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--bad);} .drawer__head h3{margin:2px 0 8px;} .drawer__head button{font:inherit; font-size:22px; border:0; background:transparent; cursor:pointer;}
 .np-evi{font-size:12.5px; padding:6px 10px; background:var(--lilac-tint); border-left:3px solid var(--lilac); margin-bottom:10px;}
 
+/* hours calculator (stage 4) */
+.calc.hot{border-color:var(--bad);} .calc.fine{border-color:var(--ok);}
+.calc__grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;} .calc__grid div{border:1px solid var(--line); padding:8px 10px;} .calc__grid span{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--ink-3);} .calc__grid b{font-size:18px;} .calc__grid b.bad{color:var(--bad);} .calc__grid b.ok{color:var(--ok);}
+@media (max-width:760px){.calc__grid{grid-template-columns:1fr 1fr;}}
+
 /* notifications */
 .bell{position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:2px solid rgba(255,255,255,.35); color:#fff; text-decoration:none; font-size:16px;}
 .bell.has{border-color:var(--teal);} .bell b{position:absolute; top:-8px; right:-8px; min-width:18px; height:18px; padding:0 5px; background:var(--teal); color:var(--navy); font-size:11px; line-height:18px; text-align:center; border-radius:0;}
