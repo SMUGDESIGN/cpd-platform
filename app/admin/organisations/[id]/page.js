@@ -46,12 +46,12 @@ export default function Organisation() {
               <thead><tr><th>Ref</th><th>Activity</th><th>Assessor view</th><th>Provider sees</th><th>Next review</th><th>Saved</th></tr></thead>
               <tbody>
                 {!d.cases.length && <tr><td colSpan={6} className="muted">No cases linked yet.</td></tr>}
-                {d.cases.map((c) => <tr key={c.id}><td><Link href={'/tool?entry=' + encodeURIComponent(c.id)} className="ref">{c.ref || '—'}</Link></td><td>{c.activity}</td><td><span className={'status ' + c.vcls}>{c.verdict}</span></td><td>{c.provider.headline}</td><td className="nowrap">{c.provider.review ? c.provider.review.next + ' · ' + c.provider.review.nextLong : '—'}</td><td className="nowrap">{when(c.updatedAt)}{c.updatedBy ? ' · ' + c.updatedBy : ''}</td></tr>)}
+                {d.cases.map((c) => <tr key={c.id}><td><Link href={'/cases/' + encodeURIComponent(c.id)} className="ref">{c.ref || '—'}</Link></td><td>{c.activity}</td><td><span className={'status ' + c.vcls}>{c.verdict}</span></td><td>{c.provider.headline}</td><td className="nowrap">{c.provider.review ? c.provider.review.next + ' · ' + c.provider.review.nextLong : '—'}</td><td className="nowrap">{when(c.updatedAt)}{c.updatedBy ? ' · ' + c.updatedBy : ''}</td></tr>)}
               </tbody>
             </table>
             {d.unassigned.length > 0 && (
               <div className="act-row" style={{ marginTop: 12 }}>
-                <select className="input" value={assign} onChange={(e) => setAssign(e.target.value)}><option value="">Link a case opened in the tool…</option>{d.unassigned.map((u) => <option key={u.id} value={u.id}>{u.ref || u.id} · {u.activity || 'untitled'}{u.provider ? ' · ' + u.provider : ''}</option>)}</select>
+                <select className="input" value={assign} onChange={(e) => setAssign(e.target.value)}><option value="">Link a case not yet assigned to a provider…</option>{d.unassigned.map((u) => <option key={u.id} value={u.id}>{u.ref || u.id} · {u.activity || 'untitled'}{u.provider ? ' · ' + u.provider : ''}</option>)}</select>
                 <button className="btn" disabled={!assign} onClick={() => post('/api/admin/organisations/' + id + '/entries', { entryId: assign }).then(() => setAssign(''))}>Link to this provider</button>
               </div>
             )}

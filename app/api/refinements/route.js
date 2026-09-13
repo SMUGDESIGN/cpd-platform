@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
 import { requireInternal, requireCaseEditor } from '@/lib/session';
 
-/* The proposal queue, as the tool holds it: { id: {text, notNeeded, by, at, reason, history} }. */
+/* The proposal queue: { id: {text, notNeeded, by, at, reason, history} }. */
 export async function GET() {
   const { session, res } = await requireInternal();
   if (res) return res;
@@ -12,8 +12,8 @@ export async function GET() {
   return NextResponse.json({ refinements });
 }
 
-/* Replace the whole set: rows not in the body are removed (the tool deletes a
-   refinement by leaving it out, e.g. "Restore original"). */
+/* Replace the whole set: rows not in the body are removed ("Restore original"
+   deletes a refinement by leaving it out). */
 export async function PUT(req) {
   const { session, res } = await requireCaseEditor();
   if (res) return res;

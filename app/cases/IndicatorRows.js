@@ -101,7 +101,7 @@ export function StageMatrix({ rows, ...handlers }) {
   ));
 }
 
-/* The hard-stop provider notice - the drawer the tool slides in from the right. */
+/* The hard-stop provider notice drawer. */
 export function NoticeDrawer({ row, doc, refinements, onSave, onClear, onReply, onClose }) {
   const n = row.notice || {};
   const [f, setF] = useState({ ask: n.ask || row.finding || '', due: n.due || '', channel: n.channel || '', cause: row.cause || '', apply: true });

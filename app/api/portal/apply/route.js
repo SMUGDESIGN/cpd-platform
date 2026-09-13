@@ -5,7 +5,7 @@ import { blankDoc } from '@/lib/framework';
 import { nextRef } from '@/lib/refs.server';
 import { notify } from '@/lib/notify.server';
 
-/* A new application. Creates the case in exactly the tool's document shape
+/* A new application. Creates the case document
    with the facts the provider gave, a reference minted here, and the
    submission on the remediation log; the coordinator picks it up in the
    caseload at Stage 1. */
@@ -41,6 +41,6 @@ export async function POST(req) {
     await tx('INSERT INTO portal_events (org_id, entry_id, kind, message, by_user) VALUES ($1,$2,$3,$4,$5)', [orgId, id, 'submitted', 'New application: ' + activity, session.user.id]);
     return { id, ref };
   });
-  await notify({ to: { internal: true }, kind: 'application', title: out.ref + ': new application from ' + org.name, body: activity + ' - ' + hours + ' CPD hours. Stage 1 completeness check to run.', href: '/tool?entry=' + encodeURIComponent(out.id), entryId: out.id, orgId });
+  await notify({ to: { internal: true }, kind: 'application', title: out.ref + ': new application from ' + org.name, body: activity + ' - ' + hours + ' CPD hours. Stage 1 completeness check to run.', href: '/cases/' + encodeURIComponent(out.id) + '/stage-1', entryId: out.id, orgId });
   return NextResponse.json(out, { status: 201 });
 }

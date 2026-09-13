@@ -3,8 +3,7 @@ import { query, withTransaction } from '@/lib/db';
 import { requireInternal, requireCaseEditor } from '@/lib/session';
 import { surveillanceInfo } from '@/lib/scoring';
 
-/* The caseload. Listing fields only - the document itself comes from
-   /api/entries/[id] or, for the tool's boot, /api/store. */
+/* The caseload. Listing fields only - the document itself comes from /api/entries/[id]. */
 export async function GET() {
   const { session, res } = await requireInternal();
   if (res) return res;
@@ -16,7 +15,7 @@ export async function GET() {
       WHERE e.archived_at IS NULL
       ORDER BY e.updated_at DESC`
   );
-  /* the review-due column, from the accreditation date - the tool's dashboard column */
+  /* the review-due column, from the accreditation date */
   const entries = rows.map((r) => {
     const info = surveillanceInfo({ outcome: r.outcome || {}, surveillance: r.surveillance || {} });
     const { outcome, surveillance, ...rest } = r;
@@ -25,9 +24,8 @@ export async function GET() {
   return NextResponse.json({ entries });
 }
 
-/* Create a case. The body is the tool's per-entry document; the id is the
-   tool's own if it sends one (so an imported JSON file keeps its identity),
-   else minted here in the same shape. */
+/* Create a case from a full document (a renewal duplicate, or a case file
+   brought in from elsewhere). The caller may supply the id; else it is minted. */
 export async function POST(req) {
   const { session, res } = await requireCaseEditor();
   if (res) return res;

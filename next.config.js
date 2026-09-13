@@ -10,9 +10,8 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
-          /* SAMEORIGIN rather than DENY: the assessor tool previews the client
-             status page and the unit specification in same-origin iframes. */
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          /* No page of this platform has any business inside anybody's iframe. */
+          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },

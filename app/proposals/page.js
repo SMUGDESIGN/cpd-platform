@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import AppLayout from '../AppLayout';
 
 /* The proposal queue to the Standards Panel: every refinement made in the
-   tool, with who, when and why. Read-only here; the tool is where they are
+   stage pages, with who, when and why. Read-only here; the Refine buttons are where they are
    made, and DECISIONS.md is where they are decided. */
 export default function Proposals() {
   const [items, setItems] = useState(null);

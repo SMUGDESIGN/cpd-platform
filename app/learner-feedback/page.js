@@ -16,7 +16,7 @@ function Activity({ a, onShare, sharing, shared }) {
   return (
     <div className={'panel act flag-' + a.flag}>
       <div className="page-head">
-        <div><h2>{a.activity}</h2><p className="muted">{a.provider} · {a.ref} · {a.n} verified response{a.n === 1 ? '' : 's'} in 12 months{a.entryId ? <> · <Link href={'/tool?entry=' + encodeURIComponent(a.entryId)}>open case</Link></> : null}</p></div>
+        <div><h2>{a.activity}</h2><p className="muted">{a.provider} · {a.ref} · {a.n} verified response{a.n === 1 ? '' : 's'} in 12 months{a.entryId ? <> · <Link href={'/cases/' + encodeURIComponent(a.entryId)}>open case</Link></> : null}</p></div>
         <span className={'status rag ' + a.flag}>{FLAG[a.flag]}{a.overall != null ? ' · ' + a.overall + '/100' : ''}</span>
       </div>
       <div className="grid2">

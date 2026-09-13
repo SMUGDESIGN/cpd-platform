@@ -1,9 +1,11 @@
 # CPD Accreditation Scheme - assessor platform
 
-The scheme's own platform: the eight-stage assessment workflow behind a login,
-every case file in a real database with a full save history, the proposal
-queue to the Standards Panel, and (in later batches) the public verify lookup
-and the learner feedback form. Built on the same chassis as the Derby Book
+The scheme's own platform: the eight-stage assessment workflow as pages behind
+a login, every case file in a real database with a full save history and
+version-locked saves, the provider portal (apply, progress, billing, feedback),
+the admin area (organisations, people, invoices), in-app and email
+notifications, the proposal queue to the Standards Panel, the public register
+lookup and the learner feedback form. Built on the same chassis as the Derby Book
 Festival Hub (`~/Documents/Claude/dbf-hub`) so it runs locally exactly as it
 will run on Vercel with a managed Postgres, and moves there with no code change.
 

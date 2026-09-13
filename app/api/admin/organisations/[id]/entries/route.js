@@ -3,8 +3,8 @@ import { query } from '@/lib/db';
 import { requireInternal } from '@/lib/session';
 import { notify } from '@/lib/notify.server';
 
-/* Link a case to this provider (cases opened in the tool before the portal
-   existed have no owner). The case's provider name is set from the
+/* Link a case to this provider (a case started from the staff side without
+   an organisation has no owner). The case's provider name is set from the
    organisation if the document has none. */
 export async function POST(req, { params }) {
   const { session, res } = await requireInternal();

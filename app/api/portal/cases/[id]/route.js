@@ -24,7 +24,7 @@ export async function GET(_req, { params }) {
 /* The provider's two actions on a case - both written INTO the case document
    so the assessor sees them where they already look (the notice's reply
    thread, the return record), and into portal_events so nothing goes unread.
-   The save bumps the document version like any other save; the tool learns
+   The save bumps the document version like any other save; an open stage page
    of it as a "saved elsewhere" and reloads, which is right. */
 export async function POST(req, { params }) {
   const { session, orgId, res } = await requireProvider();
@@ -69,7 +69,7 @@ export async function POST(req, { params }) {
   });
   if (out.status !== 200) return NextResponse.json({ error: out.error }, { status: out.status });
   /* the assessors hear about it where they work */
-  await notify({ to: { internal: true }, kind: 'provider_reply', title: (out.ref || 'a case') + ': ' + (session.user.orgName || 'provider') + ' replied', body: out.message, href: '/tool?entry=' + encodeURIComponent(params.id), entryId: params.id, orgId });
+  await notify({ to: { internal: true }, kind: 'provider_reply', title: (out.ref || 'a case') + ': ' + (session.user.orgName || 'provider') + ' replied', body: out.message, href: '/cases/' + encodeURIComponent(params.id), entryId: params.id, orgId });
   const row = await ownRow(params.id, orgId);
   return NextResponse.json({ ok: true, view: providerView(row) });
 }

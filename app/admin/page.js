@@ -48,7 +48,7 @@ export default function Admin() {
           <div className="panel">
             <div className="page-head"><h2>From providers, unread ({d.unseenEvents.length})</h2>{d.unseenEvents.length > 0 && <button className="btn" onClick={() => seen(d.unseenEvents.map((e) => e.id))}>Mark all read</button>}</div>
             {!d.unseenEvents.length && <p className="muted">Nothing waiting.</p>}
-            <ul className="events">{d.unseenEvents.map((e) => <li key={e.id}><span className="muted">{when(e.at)}</span> <b>{e.org_name}</b>{e.ref ? <> · <Link href={'/tool?entry=' + encodeURIComponent(e.entry_id)}>{e.ref}</Link></> : null} · {KIND[e.kind] || e.kind}{e.message ? ': ' + e.message : ''} <button className="btn btn--tiny" onClick={() => seen([e.id])}>read</button></li>)}</ul>
+            <ul className="events">{d.unseenEvents.map((e) => <li key={e.id}><span className="muted">{when(e.at)}</span> <b>{e.org_name}</b>{e.ref ? <> · <Link href={'/cases/' + encodeURIComponent(e.entry_id)}>{e.ref}</Link></> : null} · {KIND[e.kind] || e.kind}{e.message ? ': ' + e.message : ''} <button className="btn btn--tiny" onClick={() => seen([e.id])}>read</button></li>)}</ul>
           </div>
           {mail && (
             <div className="panel">

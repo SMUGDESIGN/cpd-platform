@@ -2,8 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /* One case, loaded from the platform and saved back with the version it
-   read - the same contract the framed tool honours, so the two can be open
-   on the same case and the second saver is told, never overwritten.
+   read, so two people can have the same case open and the second saver is
+   told, never overwritten.
    `update(fn)` mutates a copy and schedules a debounced save; the summary
    passed in is what the caseload shows. */
 export function useCase(id, summarise) {
@@ -53,7 +53,7 @@ export function useCase(id, summarise) {
     timer.current = setTimeout(flush, 600);
   }, [flush]);
 
-  /* the proposal queue is model-level: replace the whole set, as the tool does */
+  /* the proposal queue is model-level: replace the whole set */
   const saveRefinements = useCallback(async (next) => {
     setRefinements(next);
     const r = await fetch('/api/refinements', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ refinements: next }) });

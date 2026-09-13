@@ -15,7 +15,7 @@ export async function GET(_req, { params }) {
   return NextResponse.json(rows[0]);
 }
 
-/* Save. The body carries the document, the tool's summary of it, and the
+/* Save. The body carries the document, its summary, and the
    version the client READ. A stale version is refused with the current row
    so the client can show what happened rather than overwrite a colleague. */
 export async function PUT(req, { params }) {

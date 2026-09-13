@@ -33,14 +33,12 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_at ON login_attempts(at);
 -- ---------------------------------------------------------------------------
 -- Case files.
 --
--- One row per application, holding the WHOLE case as a document (`doc`) in
--- exactly the shape the assessor tool exports per entry: caseInfo, completeness,
--- indicators, notices, moderation, returns, decision, deferral, conditions,
--- surveillance, remediationLog, outcome. That shape is the contract the tool
--- has carried since July 2026 and every backup file on disk already matches
--- it, so nothing is migrated by hand. Columns beside it are denormalised
--- from the doc for listing and search, and `summary` is the tool's own
--- scoreEntry() result at save time (verdict, points, gates, stage flags) so
+-- One row per application, holding the WHOLE case as a document (`doc`):
+-- caseInfo, completeness, indicators, notices, moderation, returns, decision,
+-- deferral, conditions, surveillance, remediationLog, outcome - the shape
+-- lib/framework.js blankDoc() makes. Columns beside it are denormalised
+-- from the doc for listing and search, and `summary` is lib/scoring's
+-- summarise() result at save time (verdict, points, gates, stage flags) so
 -- the caseload page never re-implements the scoring rules.
 --
 -- `version` is an optimistic lock: a save carries the version it read, and a
@@ -48,7 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_at ON login_attempts(at);
 -- overwriting a colleague's work. Every accepted save is also copied to
 -- entry_versions, which is the audit trail behind a signed decision.
 CREATE TABLE IF NOT EXISTS entries (
-  id TEXT PRIMARY KEY,                 -- the tool's own id ('e' + ms), kept so exported JSON stays compatible
+  id TEXT PRIMARY KEY,                 -- 'e' + ms + random, minted by the platform
   ref TEXT,                            -- e.g. CA-2026-0147
   activity TEXT,
   provider TEXT,
@@ -79,9 +77,7 @@ CREATE INDEX IF NOT EXISTS idx_entry_versions_entry ON entry_versions(entry_id, 
 -- ---------------------------------------------------------------------------
 -- Refinements: the proposal queue to the Standards Panel. One row per
 -- framework item (indicator, completeness item, moderation check, stage
--- description), holding the same object the tool keeps in
--- store.refinements[id] - reworded text, not-needed flag, who, when, why,
--- history. Model-level: applies to every case, so it lives beside the cases,
+-- description) - reworded text, not-needed flag, who, when, why, history. Model-level: applies to every case, so it lives beside the cases,
 -- not inside one.
 CREATE TABLE IF NOT EXISTS refinements (
   id TEXT PRIMARY KEY,                 -- '1.5.2', 'C-04', 'MOD-2', 'STAGE-6'
@@ -121,8 +117,8 @@ CREATE TABLE IF NOT EXISTS organisations (
 );
 ALTER TABLE users ADD COLUMN IF NOT EXISTS org_id INTEGER REFERENCES organisations(id);
 CREATE INDEX IF NOT EXISTS idx_users_org ON users(org_id);
--- Which provider a case belongs to. NULL on cases opened inside the tool
--- before the portal existed; assign them from the organisation's page.
+-- Which provider a case belongs to. NULL on a case started from the staff
+-- side without one; assign it from the organisation's page.
 ALTER TABLE entries ADD COLUMN IF NOT EXISTS org_id INTEGER REFERENCES organisations(id);
 CREATE INDEX IF NOT EXISTS idx_entries_org ON entries(org_id);
 
@@ -191,8 +187,7 @@ CREATE TABLE IF NOT EXISTS feedback_notices (
 CREATE INDEX IF NOT EXISTS idx_feedback_notices_org ON feedback_notices(org_id, created_at DESC);
 
 -- ---------------------------------------------------------------------------
--- LEARNER FEEDBACK (moved server-side 13 Sep 2026 from the website's
--- localStorage pipeline). One row per verified completion: the accreditation
+-- LEARNER FEEDBACK. One row per verified completion: the accreditation
 -- number is checked against the register (lib/register.server.js) at
 -- submission, so a response can only exist for a real accredited activity.
 -- De-duplicated per course by certificate serial or by email - one response

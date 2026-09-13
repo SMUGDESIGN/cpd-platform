@@ -6,13 +6,12 @@ import { useSession, signOut } from 'next-auth/react';
 import Bell from './Bell';
 import ViewAs from './ViewAs';
 
-/* Two houses, one shell. Staff see the caseload and the tool; providers see
+/* Two houses, one shell. Staff see the caseload and the case pages; providers see
    their portal. The nav is decided by the role on the session, and a person
    on the wrong side of the house is sent to their own front door - the API
    would refuse them anyway (lib/session.js), this just saves them the 403. */
 const STAFF_NAV = [
   { href: '/dashboard', label: 'Caseload' },
-  { href: '/tool', label: 'Assessment tool' },
   { href: '/learner-feedback', label: 'Learner feedback' },
   { href: '/proposals', label: 'Proposals' },
   { href: '/admin', label: 'Admin', admin: true },
@@ -33,7 +32,7 @@ function useSignOutIfDead() {
   return dead;
 }
 
-export default function AppLayout({ children, wide }) {
+export default function AppLayout({ children }) {
   const { data: session, status } = useSession();
   const path = usePathname() || '';
   const router = useRouter();
@@ -72,7 +71,7 @@ export default function AppLayout({ children, wide }) {
         </div>
       </header>
       <ViewAs />
-      <main className={wide ? 'container container--wide' : 'container'} id="main-content" tabIndex={-1}>{children}</main>
+      <main className="container" id="main-content" tabIndex={-1}>{children}</main>
     </div>
   );
 }
