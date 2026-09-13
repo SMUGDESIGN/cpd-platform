@@ -48,7 +48,7 @@ export default function Dashboard() {
                 const st = s.stages || {};
                 return (
                   <tr key={r.id}>
-                    <td><Link href={'/tool?entry=' + encodeURIComponent(r.id)} className="ref">{r.ref || '—'}</Link></td>
+                    <td><Link href={'/cases/' + encodeURIComponent(r.id)} className="ref">{r.ref || '—'}</Link> <Link href={'/tool?entry=' + encodeURIComponent(r.id)} className="muted" title="Open in the assessment tool">tool</Link></td>
                     <td>{r.activity || 'New entry'}</td>
                     <td>{r.provider || '—'}</td>
                     <td><div className="stages">{[1,2,3,4,5,6,7,8].map((i) => <span key={i} className={'sq ' + (st[i] || 'none')} title={'Stage ' + i}>{i}</span>)}</div></td>
