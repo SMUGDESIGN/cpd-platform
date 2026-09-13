@@ -188,3 +188,39 @@ CREATE TABLE IF NOT EXISTS feedback_notices (
   response TEXT                            -- what the provider said they will do
 );
 CREATE INDEX IF NOT EXISTS idx_feedback_notices_org ON feedback_notices(org_id, created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- LEARNER FEEDBACK (moved server-side 13 Sep 2026 from the website's
+-- localStorage pipeline). One row per verified completion: the accreditation
+-- number is checked against the register (lib/register.server.js) at
+-- submission, so a response can only exist for a real accredited activity.
+-- De-duplicated per course by certificate serial or by email - one response
+-- per completion keeps the picture honest. Identity fields exist only so a
+-- completion can be confirmed; the provider never sees them (lib/feedback.js
+-- aggregates are what leave this table).
+CREATE TABLE IF NOT EXISTS feedback_responses (
+  id SERIAL PRIMARY KEY,
+  acc_ref TEXT NOT NULL,                               -- ACT-2026-0147, as on the certificate
+  entry_id TEXT REFERENCES entries(id) ON DELETE SET NULL,
+  org_id INTEGER REFERENCES organisations(id),
+  cert_serial TEXT NOT NULL DEFAULT '',
+  completed_on TEXT,                                   -- 'YYYY-MM'
+  answers JSONB NOT NULL,                              -- {relevance, clarity, ..., support} labels
+  comments JSONB NOT NULL DEFAULT '{}'::jsonb,         -- {promise, navigation, technical, accessibility, support, likeMost, improve, additional}
+  contact_name TEXT,
+  contact_email TEXT NOT NULL DEFAULT '',
+  may_contact BOOLEAN NOT NULL DEFAULT false,
+  ip_hash TEXT,                                        -- salted hash, for the per-address cap only
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_feedback_ref ON feedback_responses(acc_ref, submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feedback_entry ON feedback_responses(entry_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_ip ON feedback_responses(ip_hash, submitted_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_feedback_serial ON feedback_responses(acc_ref, lower(cert_serial)) WHERE cert_serial <> '';
+CREATE UNIQUE INDEX IF NOT EXISTS uq_feedback_email ON feedback_responses(acc_ref, lower(contact_email)) WHERE contact_email <> '';
+
+-- The register's own say over an accreditation, beyond what the case file
+-- computes: NULL = as computed (accredited / expired by date); 'suspended' or
+-- 'withdrawn' set by the scheme under D4. Read by the public verify lookup.
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS register_status TEXT;
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS register_note TEXT;

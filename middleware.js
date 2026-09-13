@@ -4,19 +4,16 @@ import { getToken } from 'next-auth/jwt';
 /* Everything is behind the login except the paths that must not be.
  * Deny-by-default: a new page is protected the moment it exists.
  *
- *   login, api/auth   the door and NextAuth's own endpoints
- *   verify, api/verify   a certificate or accreditation number checked by the
- *                        public (register lookup) - reads published fields only
- *   feedback, api/feedback   the learner feedback form, gated by a valid
- *                            accreditation number, never by a session
+ *   login, api/auth        the door and NextAuth's own endpoints
+ *   verify, api/verify     the public register lookup - published fields only
+ *   feedback, api/feedback the learner feedback form, gated by a real
+ *                          accreditation number, never by a session
  *   _next/static, _next/image, favicon, icon, images/   build output and marks
  *
- * A signed-out API call gets a 401 in JSON - a fetch() that is redirected to
- * the login page receives HTML where it expected data, and the page it came
- * from cannot tell "not signed in" from "broken". A signed-out page visit is
- * sent to /login with the address to come back to. Every API route also
- * checks the session itself (lib/session.js); this is the shell's lock, not
- * the only lock.
+ * Each public name is bounded with (?:/|$) so that, say, /learner-feedback
+ * (internal) is not opened by the /feedback rule. A signed-out API call gets
+ * 401 JSON; a signed-out page visit goes to /login with a return address.
+ * Every API route also checks the session itself (lib/session.js).
  */
 export async function middleware(req) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -32,6 +29,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    '/((?!login|verify|feedback|api/auth|api/verify|api/feedback|_next/static|_next/image|favicon.ico|icon.svg|images/).*)',
+    '/((?!login(?:/|$)|verify(?:/|$)|feedback(?:/|$)|api/auth(?:/|$)|api/verify(?:/|$)|api/feedback(?:/|$)|_next/static|_next/image|favicon.ico|icon.svg|images/).*)',
   ],
 };

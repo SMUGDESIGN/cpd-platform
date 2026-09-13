@@ -11,6 +11,7 @@ import { useSession, signOut } from 'next-auth/react';
 const STAFF_NAV = [
   { href: '/dashboard', label: 'Caseload' },
   { href: '/tool', label: 'Assessment tool' },
+  { href: '/learner-feedback', label: 'Learner feedback' },
   { href: '/proposals', label: 'Proposals' },
   { href: '/admin', label: 'Admin', admin: true },
   { href: '/account', label: 'Account' },

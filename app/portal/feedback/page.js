@@ -27,7 +27,14 @@ export default function Feedback() {
         <div key={n.id} className={'panel fb rag-' + n.rag}>
           <p><span className={'status rag ' + n.rag}>{RAG[n.rag]}</span> <b>{n.activity || 'Your organisation'}</b>{n.ref ? <span className="muted"> · {n.ref}</span> : null} · <span className="muted">{when(n.created_at)}</span></p>
           <p>{n.message}</p>
-          {n.snapshot && typeof n.snapshot === 'object' && (
+          {n.snapshot && n.snapshot.kind === 'learner-feedback' && (
+            <div className="snap">
+              <p className="muted">{n.snapshot.n} verified response{n.snapshot.n === 1 ? '' : 's'} over the last 12 months · overall {n.snapshot.overall != null ? n.snapshot.overall + '/100' : 'n/a'}{n.snapshot.trend != null ? ' · trend ' + (n.snapshot.trend > 0 ? '+' : '') + n.snapshot.trend + ' pts over the last quarter' : ''}</p>
+              {n.snapshot.dims.map((d) => <div key={d.label} className={'dim ' + (d.mean >= 75 ? 'green' : (d.mean >= 55 ? 'amber' : 'red'))}><span className="dl">{d.label}</span><span className="track"><span className="fill" style={{ width: d.mean + '%' }} /></span><span className="dv">{d.mean}</span></div>)}
+              {n.snapshot.comments && n.snapshot.comments.length > 0 && <div><p className="muted" style={{ marginTop: 8 }}>What learners wrote (anonymised):</p>{n.snapshot.comments.map((c, i) => <blockquote key={i} className="cmt">"{c.text}" <span className="muted">{c.when}</span></blockquote>)}</div>}
+            </div>
+          )}
+          {n.snapshot && n.snapshot.kind !== 'learner-feedback' && typeof n.snapshot === 'object' && (
             <dl className="snapshot">{Object.keys(n.snapshot).map((k) => <div key={k}><dt>{k}</dt><dd>{String(n.snapshot[k])}</dd></div>)}</dl>
           )}
           {n.acknowledged_at ? <p className="muted">Your response on {when(n.acknowledged_at)}: {n.response}</p> : (
