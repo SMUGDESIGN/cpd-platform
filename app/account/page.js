@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import AppLayout from '../AppLayout';
+import EmailPrefs from '../EmailPrefs';
 
 export default function Account() {
   const { data: session } = useSession();
@@ -22,6 +23,7 @@ export default function Account() {
       <div className="panel">
         <p><strong>{session?.user?.name}</strong> · {session?.user?.email} · role: {session?.user?.role} · initials {session?.user?.initials}</p>
       </div>
+      <EmailPrefs />
       <div className="panel">
         <h2>Change password</h2>
         <form onSubmit={change} className="form-narrow">

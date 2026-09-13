@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import AppLayout from '../../AppLayout';
+import EmailPrefs from '../../EmailPrefs';
 
 export default function ProviderAccount() {
   const { data: session } = useSession();
@@ -48,6 +49,7 @@ export default function ProviderAccount() {
             <ul className="plain">{d.users.map((u) => <li key={u.id}>{u.name} · {u.email}{!u.active ? ' · deactivated' : ''}{session?.user?.email === u.email ? ' (you)' : ''}</li>)}</ul>
             <p className="muted">To add or remove a colleague, ask us - we set up access and hand over a one-time password.</p>
           </div>
+          <EmailPrefs />
           <div className="panel">
             <h2>Your password</h2>
             <form onSubmit={changePw} className="form-narrow">

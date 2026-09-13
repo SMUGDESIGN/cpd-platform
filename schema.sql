@@ -255,3 +255,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_notifications_dedupe ON notifications(user_
 
 -- 13 Sep 2026: the 'admin' role became 'support' (accounts), and 'superadmin' was added (everything).
 UPDATE users SET role = 'support' WHERE role = 'admin';
+
+-- ---------------------------------------------------------------------------
+-- EMAIL DELIVERY (added 13 Sep 2026). A notification is the record; email is
+-- one way of delivering it. Each person chooses: 'immediate' (urgent kinds
+-- at once, the rest in the daily digest), 'daily' (everything in one digest),
+-- 'off' (in-app only). Every email attempted is written to email_outbox first,
+-- so the local build (EMAIL_PROVIDER=log) shows exactly what would have gone,
+-- and a failure with the real provider is visible rather than silent.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_notifications TEXT NOT NULL DEFAULT 'immediate';
+CREATE TABLE IF NOT EXISTS email_outbox (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  to_email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  text_body TEXT NOT NULL,
+  html_body TEXT,
+  notification_ids INTEGER[] NOT NULL DEFAULT '{}',
+  provider TEXT NOT NULL,                  -- 'log' | 'resend'
+  status TEXT NOT NULL,                    -- 'logged' | 'sent' | 'failed'
+  provider_id TEXT,
+  error TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_email_outbox_created ON email_outbox(created_at DESC);

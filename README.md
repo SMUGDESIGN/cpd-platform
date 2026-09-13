@@ -33,8 +33,14 @@ Ports: app 3006, Postgres 5545 (the DBF Hub holds 3005 and 5544 - never share).
 
 Daily checks (fix windows, conditions, reviews, invoices -> notifications): on
 Vercel the cron in `vercel.json` calls `/api/cron/daily` with `CRON_SECRET`;
-locally use the Admin page's "Run daily checks" or `npm run cron`. Notifications
-are in-app only for now; `notifications.email_sent_at` is the hook for email.
+locally use the Admin page's "Run daily checks" or `npm run cron`. The cron
+also sends the daily email digests.
+
+Email: `EMAIL_PROVIDER=log` (default) writes every email to the `email_outbox`
+table instead of sending - read them on the Admin page. For real delivery set
+`EMAIL_PROVIDER=resend`, `RESEND_API_KEY` and `EMAIL_FROM` (a verified sender
+on your Resend domain). Each person chooses immediate / daily / off under
+Account; urgent kinds go at once, the rest in the digest.
 
 The database is a real Postgres running from `node_modules` into `.pgdata/`.
 Deploying later means: a GitHub repo, a Vercel project, a managed Postgres
