@@ -58,25 +58,21 @@ export default function StagePage({ stage, title, intro, notesKey, notesPlacehol
 
   return (
     <AppLayout>
-      <CaseShell id={id} doc={doc} summary={sum} saveState={saveState} failed={failed}>
-        {failed && <div className="alert alert--error">{saveState} <button className="btn btn--tiny" onClick={reload}>Reload</button></div>}
-        <div className="panel">
-          <div className="page-head"><h2>Stage {stage} — {title}</h2><span className="muted">{counts.judged} / {counts.total} judged · gates {counts.gatesMet} / {counts.gates}{counts.failing ? ' · ' + counts.failing + ' failing' : ''}{counts.na ? ' · ' + counts.na + ' N/A from the case setup' : ''}</span></div>
-          <p className="muted">{intro}</p>
-          {locked && <div className="alert alert--error">Locked — complete Stage 1 (all completeness items) first: nothing is judged until the submission is assessable.{s1 === 'sent' ? ' The submission is with the provider.' : ''}</div>}
-        </div>
-        {Extra && <Extra {...ctx} />}
-        <StageMatrix rows={rows} locked={locked} onRate={onRate} onFinding={onFinding} onStep={onStep} onRefine={onRefine} onNotice={(r) => setNotice(r.id)} rateMsgs={rateMsgs} />
-        {notesKey && (
-          <div className="panel" style={{ marginTop: 14 }}>
-            <h2>Stage {stage} notes</h2>
-            <textarea className="input" rows={4} value={(doc.logs || {})[notesKey] || ''} onChange={(e) => update((d) => { d.logs = d.logs || {}; d.logs[notesKey] = e.target.value; })} placeholder={notesPlaceholder} />
+      <CaseShell id={id} doc={doc} summary={sum} refinements={refinements} saveState={saveState} failed={failed}>
+        {failed && <div className="alert alert-bad">{saveState} <button className="btn btn-tiny" onClick={reload}>Reload</button></div>}
+        <section className="stage active">
+          <div className="panel">
+            <div className="stage-head"><h2>Stage {stage} — {title}</h2><span className="gate-chip">{counts.judged} / {counts.total} judged · gates {counts.gatesMet} / {counts.gates}{counts.failing ? ' · ' + counts.failing + ' failing' : ''}{counts.na ? ' · ' + counts.na + ' N/A from setup' : ''}</span></div>
+            <p className="purpose">{intro}</p>
+            {locked && <div className="lock-note show">Locked — complete Stage 1 (all completeness items) first: nothing is judged until the submission is assessable.{s1 === 'sent' ? ' The submission is with the provider.' : ''}</div>}
+            {Extra && <Extra {...ctx} />}
+            <StageMatrix rows={rows} locked={locked} onRate={onRate} onFinding={onFinding} onStep={onStep} onRefine={onRefine} onNotice={(r) => setNotice(r.id)} rateMsgs={rateMsgs} />
+            {notesKey && (<>
+              <div className="note-label">Stage {stage} notes</div>
+              <textarea rows={4} value={(doc.logs || {})[notesKey] || ''} onChange={(e) => update((d) => { d.logs = d.logs || {}; d.logs[notesKey] = e.target.value; })} placeholder={notesPlaceholder} />
+            </>)}
           </div>
-        )}
-        <div className="sf">
-          <div className="sf__v"><span className={'status ' + (sum.vcls || 'idle')}>{sum.verdict}</span></div>
-          <div className="sf__stats"><div><b>{sum.gM} / {sum.gT}</b><span>gates met</span></div><div><b>{sum.gF}</b><span>gates failing</span></div><div><b>{sum.app ? sum.pct + '%' : '–'}</b><span>scored points</span></div><div><b>{sum.ans} / {sum.app}</b><span>indicators judged</span></div></div>
-        </div>
+        </section>
         {noticeRow && <NoticeDrawer row={noticeRow} doc={doc} refinements={refinements} onSave={onNoticeSave} onClear={onNoticeClear} onReply={onReply} onClose={() => setNotice(null)} />}
       </CaseShell>
     </AppLayout>

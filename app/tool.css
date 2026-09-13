@@ -1,0 +1,747 @@
+/* ===== Assessor tool look - Paul's design, July-September 2026. Lifted verbatim from the
+   retired browser tool's stylesheet and scoped to .tool-shell (the case pages). Change the
+   look here; the platform shell (top bar, portal, admin) has its own rules in globals.css. ===== */
+
+  :root{
+    --navy:#211A5E; --navy-deep:#171243;
+    --lilac:#9A94D0; --lilac-strong:#7C74C4; --lilac-tint:#EFEEF8; --lilac-tint-2:#E3E1F1;
+    --ring-fill:#7C74C4; --ring-track:#D7D4EC;
+    --teal:#00D2C4;
+    --ink:#1E2130; --ink-2:#4B4F63; --ink-3:#787D95;
+    --line:#E2E1EF; --paper-2:#F7F7FB;
+    --surface:#fff; --surface-2:#F1F1F7; /* panels/inputs, and subtle inset surfaces — themed below */
+    --ok:#0A7A6E; --ok-soft:#DEF4F1; /* positive/pass = deep brand-family teal (white text passes AA ~5.2:1; reads as a signal vs amber/red). Bright --teal stays the primary-action colour. */
+    --warn:#ecb00e; --warn-soft:#FDF0D7;
+    --bad:#A6362D; --bad-soft:#FBE9E7;
+    --defer:#6b21a8; --defer-soft:#f1e6fb;
+  }
+  /* ---------- accessibility colour themes (data-theme on <html>) ----------
+     Dark LIGHTENS --navy rather than remapping 40 heading rules: navy is used both as
+     heading text AND as header/button/border brand-dark, so a single lightened value keeps
+     all of it legible on a dark page (headings get an extra crisp override below). --surface
+     tokens carry the 28 panel/input whites so they flip cleanly. */
+  /* High contrast: pure black text on white, black lines, near-black brand bands (max legibility). */
+  /* Reduce motion (data-a11y-motion="reduce") */
+
+  /* ---------- header & toolbar ---------- */
+  .tool-shell header.tool{background:var(--navy); color:#fff; padding:22px 0 20px;}
+  .tool-shell header.tool .wrap{display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between;}
+  .tool-shell .brandwrap{display:flex; align-items:center; gap:16px;}
+  .tool-shell .brand-logo{height:58px; width:auto; display:block; flex:none;}
+  .tool-shell .brandmark{font-size:11.5px; letter-spacing:2px; text-transform:uppercase; color:var(--lilac);}
+  .tool-shell header.tool h1{color:#fff; font-size:19px; margin-top:2px;}
+  @media (max-width:520px){ .tool-shell .brand-logo{height:46px;}}
+  /* buttons stay their own single-line row; save-state sits below so its text (which grows
+     with the "backup over 24h old" nudge) never wraps the button row down */
+  .tool-shell .toolbar{display:flex; flex-direction:column; align-items:flex-end; gap:6px;}
+  .tool-shell .toolbar-btns{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  .tool-shell .save-state{font-size:11.5px; color:var(--lilac);}
+
+  /* ---------- field styles (used in the case modal) ---------- */
+  .tool-shell .opts{display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:4px;}
+  .tool-shell .opts label{display:flex; gap:7px; align-items:center; font-size:13.5px; cursor:pointer;}
+  .tool-shell .opts input{width:15px; height:15px; accent-color:var(--navy);}
+
+  /* ---------- compact read-only case strip (scrolls away) ---------- */
+  .tool-shell .case-strip{margin-top:16px; padding:11px 16px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; font-size:13px; cursor:pointer;}
+  .tool-shell .case-strip:hover{border-color:var(--navy);}
+  .tool-shell .case-strip .cs-ref{font-weight:700; color:var(--navy);}
+  .tool-shell .case-strip .cs-sep{color:var(--line);}
+  .tool-shell .case-strip .cs-field{color:var(--ink-2);}
+  .tool-shell .case-strip .cs-field b{color:var(--ink); font-weight:600;}
+  .tool-shell .case-strip .cs-tag{font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;
+    background:var(--lilac-tint); color:var(--navy); padding:2px 8px;}
+  .tool-shell .case-strip .cs-edit{margin-left:auto; font-size:11px; font-weight:700; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--lilac-strong);}
+  .tool-shell .case-strip.empty{color:var(--ink-3); font-style:italic;}
+
+  /* ---------- sticky timeline (where the summary used to be) ---------- */
+  .tool-shell .timeline-sticky{position:sticky; top:0; z-index:40; background:var(--paper-2);
+    margin:14px 0 0; padding:8px 0 6px; border-bottom: 2px solid var(--line);}
+
+  /* floating client-view launcher — chat-widget style: pill-shaped, bottom-right, always
+     on screen regardless of scroll/stage. Sits above the sticky footer (bottom:200px clears
+     its tallest state — the approve band pushes it to 185px) so it never covers the footer's
+     own controls; z-index 55 keeps it below the notice drawer (60) and any modal (80/85), so
+     opening either naturally covers it rather than needing extra show/hide logic. */
+
+  /* ---------- sticky summary footer (dark, full width) ---------- */
+  .tool-shell .summary-footer{position:fixed; left:0; right:0; bottom:0; z-index:45;}
+  .tool-shell .sf-verdict{background:var(--surface); border-top:2px solid var(--navy); padding:8px 16px; text-align:center;
+    font-weight:600; font-size:13px; line-height:1.35;}
+  .tool-shell .sf-verdict .verdict-cell.ok{color:var(--ok);} .sf-verdict .verdict-cell.warn{color:var(--warn);}
+  .tool-shell .sf-verdict .verdict-cell.bad{color:var(--bad);} .sf-verdict .verdict-cell.defer{color:var(--defer);}
+  .tool-shell .sf-verdict .verdict-cell.idle{color:var(--ink-3); font-weight:500;}
+  .tool-shell .sf-approve{background:var(--ok); text-align:center; padding:8px 16px; display:flex; gap:14px; align-items:center; justify-content:center; flex-wrap:wrap;}
+  .tool-shell .sf-approve.done{background:var(--ok-soft);}
+  .tool-shell .sf-approve-btn{font:inherit; font-weight:700; font-size:14px; background:var(--surface); color:var(--ok); border:0; padding:9px 24px; cursor:pointer;}
+  .tool-shell .sf-approve-btn:hover{background:#f0fff7;}
+  .tool-shell .sf-approved-msg{font-size:13px; font-weight:700; color:var(--ok);}
+  .tool-shell .sf-approve.drift{background:var(--bad-soft);} .sf-approve.drift .sf-approved-msg{color:var(--bad);}
+  /* the signed decision (Stage 7) */
+  .tool-shell .dec-sign{margin:0 0 14px; padding:12px 16px; border:2px solid var(--ink); background:var(--surface); font-size:13px; line-height:1.5;}
+  .tool-shell .dec-sign.signed{border-color:var(--ok); background:var(--ok-soft);}
+  .tool-shell .dec-sign.drift{border-color:var(--bad); background:var(--bad-soft);}
+  .tool-shell .dec-row+.dec-row{margin-top:6px;}
+  .tool-shell .dec-tag{display:inline-block; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:2px 8px; background:var(--ink); color:#fff; margin-right:6px;}
+  .tool-shell .dec-form{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .tool-shell .dec-form label{font-weight:700;}
+  .tool-shell .dec-form input{font:inherit; padding:7px 10px; border:1px solid var(--ink-3); min-width:220px; background:#fff;}
+  .tool-shell .dec-btn{font:inherit; font-weight:700; padding:8px 16px; background:var(--ok); color:#fff; border:0; cursor:pointer;}
+  .tool-shell .dec-btn:disabled{opacity:.45; cursor:not-allowed;}
+  .tool-shell .dec-withdraw{font:inherit; font-size:12px; padding:5px 10px; background:transparent; border:1px solid currentColor; cursor:pointer; color:var(--ink);}
+  .tool-shell .dec-drift{margin-top:8px; padding:8px 10px; background:#fff; border-left:4px solid var(--bad); font-weight:600;}
+  .tool-shell .dec-note{color:var(--ink-3); font-size:12px;}
+  .tool-shell .sf-approve-clear{font:inherit; font-size:11.5px; font-weight:600; background:none; border:1px solid var(--ok); color:var(--ok); padding:4px 10px; cursor:pointer;}
+  .tool-shell .sf-stats{background:var(--navy); color:#fff;}
+  .tool-shell .sf-stats-inner{max-width:var(--maxw); margin:0 auto; padding:9px 20px; display:grid;
+    grid-template-columns:repeat(5,1fr); gap:4px 18px; text-align:center;}
+  @media (max-width:640px){ .tool-shell .sf-stats-inner{grid-template-columns:repeat(3,1fr);}}
+  .tool-shell .sf-stats .cell b{display:block; font-size:18px; color:#fff; font-variant-numeric:tabular-nums;}
+  .tool-shell .sf-stats .cell span{color:var(--lilac); font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;}
+
+  /* ---------- case modal ---------- */
+
+  /* ---------- stepper: process-flow timeline ----------
+     Deliberately NOT square (brand exception): stages are events in time.
+     Circular nodes; a connector line joins stages WITHIN a phase (they belong
+     together and unlock together); flow arrows separate the phases.
+     Phases: Intake gate | Evidence & scoring (2-4) | Reliability gate | Decision (6-7). */
+  .tool-shell .stepper{display:flex; align-items:flex-start; gap:2px; margin:16px 0 6px; overflow-x:auto; padding:2px 0 8px;}
+  .tool-shell .seg{display:flex; align-items:flex-start; gap:2px; position:relative; padding:26px 6px 8px; flex:1;}
+  .tool-shell .seg::before{content:attr(data-group); position:absolute; top:6px; left:0; right:0; text-align:center; font-size:9.5px;
+    font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:var(--lilac-strong);}
+  .tool-shell .seg.grouped{background:var(--lilac-tint); border-radius:18px; flex:3;}
+  .tool-shell .flow-arrow{flex:none; align-self:flex-start; margin-top:41px; padding:0 3px; line-height:1;
+    color:var(--lilac-strong); font-weight:700; font-size:16px;}
+  .tool-shell .step{position:relative; flex:1; min-width:92px; background:none; border:0; padding:6px 8px;
+    cursor:pointer; font-family:inherit; display:flex; flex-direction:column; align-items:center; gap:7px; text-align:center;}
+  .tool-shell .step .num{position:relative; width:34px; height:34px; border-radius:50%; background:var(--surface); border:2px solid var(--lilac);
+    color:var(--navy); font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; z-index:2; flex:none; --p:0;}
+  /* progress ring: a lilac conic dial masked to a thin donut, sitting JUST OUTSIDE the
+     number circle. It lives outside .num (where the traffic-light fill is), so lilac never
+     clashes with the pass/act/sent status colour. --p (0-100) = % of this stage's steps done. */
+  .tool-shell .step .num::before{content:''; position:absolute; inset:-5px; border-radius:50%; z-index:3;
+    background:conic-gradient(var(--ring-fill) calc(var(--p) * 1%), var(--ring-track) 0);
+    -webkit-mask:radial-gradient(farthest-side, #0000 calc(100% - 4px), #000 0);
+            mask:radial-gradient(farthest-side, #0000 calc(100% - 4px), #000 0);
+    transition:background .35s ease;}
+  .tool-shell .step.locked .num::before{display:none;}
+  .tool-shell .step .t{display:block; font-size:11px; font-weight:600; color:var(--ink-2); line-height:1.3;}
+  /* connector line: only between nodes inside the same phase */
+  .tool-shell .seg .step+.step::before{content:''; position:absolute; top:22px; right:calc(50% + 17px);
+    width:calc(100% - 34px); height:2px; background:var(--lilac); z-index:1;}
+  .tool-shell .step.active .num{box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--navy);}
+  .tool-shell .step.active .t{color:var(--navy);}
+  /* per-stage status shown on the node itself + a small badge */
+  .tool-shell .step .st-flag{position:absolute; top:0; left:calc(50% + 8px); width:17px; height:17px; border-radius:50%;
+    display:none; align-items:center; justify-content:center; font-size:10px; font-weight:800; line-height:1;
+    color:#fff; z-index:3; box-shadow:0 0 0 2px #fff;}
+  /* status shown ONLY by the small top-right flag — the number circle stays clean white
+     so it reads with the lilac progress ring (no full-colour fill competing). */
+  .tool-shell .step.st-pass .st-flag{display:flex; background:var(--ok);}
+  .tool-shell .step.st-act .st-flag{display:flex; background:var(--bad);}
+  .tool-shell .step.st-sent .st-flag{display:flex; background:var(--warn);}
+  /* locked stages: the framework's C1 sequencing — greyed until the prior gate completes */
+  .tool-shell .step.locked{opacity:.45; cursor:not-allowed;}
+  .tool-shell .step.locked .num{border-style:dashed; border-color:var(--ink-3); background:var(--surface-2); color:var(--ink-3);}
+  .tool-shell .step.locked .st-flag{display:none;}
+  .tool-shell .stepper-legend{display:flex; flex-wrap:wrap; gap:6px 18px; margin:0 0 18px; font-size:11.5px; color:var(--ink-3);}
+  .tool-shell .stepper-legend span{display:flex; align-items:center; gap:6px;}
+  .tool-shell .stepper-legend i{width:14px; height:14px; display:inline-block; border-radius:50%;}
+  .tool-shell .stepper-legend i.ok{background:var(--ok);}
+  .tool-shell .stepper-legend i.act{background:var(--bad);}
+  .tool-shell .stepper-legend i.sent{background:var(--warn);}
+  .tool-shell .stepper-legend i.lock{background:var(--surface-2); border:1px dashed var(--ink-3);}
+  /* visible lock explanation (click-driven — Safari/touch don't reliably show title tooltips) */
+  .tool-shell .lock-note{display:none; margin:-8px 0 18px; padding:9px 14px; font-size:12.5px; font-weight:600;
+    background:var(--warn-soft); color:var(--warn); border:2px dashed var(--warn);}
+  .tool-shell .lock-note.show{display:block;}
+
+  /* ---------- surveillance due-date alerts: lives in the sticky timeline so a due or
+     overdue review is on screen whichever entry or stage the assessor is working in.
+     Scans the WHOLE caseload, not just the open entry. ---------- */
+  .tool-shell .sv-alerts{display:none; margin:-2px 0 12px; padding:8px 12px; background:var(--warn-soft);
+    border:2px solid var(--warn); font-size:12.5px;}
+  .tool-shell .sv-alerts.show{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center;}
+  .tool-shell .sv-alerts .sva-head{font-weight:800; color:var(--warn); letter-spacing:.6px; text-transform:uppercase; font-size:10.5px; flex:none;}
+  .tool-shell .sva-chip{font:inherit; font-size:12px; font-weight:600; border:0; cursor:pointer; padding:5px 11px;
+    background:var(--surface); color:var(--ink); border-left:4px solid var(--warn); text-align:left;}
+  .tool-shell .sva-chip:hover{background:var(--lilac-tint);}
+  .tool-shell .sva-chip b{color:var(--navy);}
+  .tool-shell .sva-chip .sva-tag{font-weight:800; text-transform:uppercase; font-size:10px; letter-spacing:.5px; color:var(--warn); margin-right:7px;}
+  .tool-shell .sva-chip.overdue{border-left-color:var(--bad);}
+  .tool-shell .sva-chip.overdue .sva-tag{color:var(--bad);}
+
+  /* ---------- stage 8: surveillance & renewal ---------- */
+  .tool-shell .sv-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:6px;}
+  @media(max-width:980px){ .tool-shell .sv-grid{grid-template-columns:1fr;}}
+  .tool-shell .sv-card{border:2px solid var(--line); padding:16px 18px; background:var(--surface);}
+  .tool-shell .sv-card.overdue{border-color:var(--bad);}
+  .tool-shell .sv-card.duesoon{border-color:var(--warn);}
+  .tool-shell .sv-card.done{border-color:var(--ok);}
+  .tool-shell .sv-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 10px; align-items:baseline; margin-bottom:2px;}
+  .tool-shell .sv-head h3{font-size:15px;}
+  .tool-shell .sv-due{font-size:11.5px; font-weight:700; padding:3px 11px; border-radius:999px; background:var(--lilac-tint); color:var(--navy); flex:none;}
+  .tool-shell .sv-due.overdue{background:var(--bad-soft); color:var(--bad);}
+  .tool-shell .sv-due.duesoon{background:var(--warn-soft); color:var(--warn);}
+  .tool-shell .sv-due.done{background:var(--ok-soft); color:var(--ok);}
+  .tool-shell .sv-sect{font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3); margin:15px 0 2px;}
+  .tool-shell .sv-outcome-row{display:flex; align-items:center; gap:12px; margin-top:15px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2);}
+  .tool-shell .sv-note{margin-top:12px;}
+  .tool-shell .sv-note textarea{width:100%;}
+  .tool-shell .sv-stamp{font-size:11.5px; color:var(--ink-3);}
+  .tool-shell .sv-renewal{margin-top:18px; padding:14px 16px; border:2px dashed var(--lilac); background:var(--lilac-tint); font-size:13px; line-height:1.5;}
+  .tool-shell .sv-renewal b{color:var(--navy);}
+  .tool-shell .sv-renewal .sv-due{margin-left:8px;}
+  .tool-shell .sv-renewal-btn{display:inline-block; margin-top:10px; font:inherit; font-weight:700; font-size:12.5px;
+    background:var(--navy); color:#fff; border:0; padding:9px 15px; cursor:pointer;}
+  .tool-shell .sv-renewal-btn:hover{background:var(--navy-deep, #171243);}
+  .tool-shell .sv-locked-note{padding:13px 16px; background:var(--lilac-tint); border:2px dashed var(--lilac); font-size:13px; color:var(--ink-2);}
+  /* dashboard review-due pill */
+
+  /* ---------- stages ---------- */
+  .tool-shell .stage-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:baseline; margin-bottom:6px;}
+  .tool-shell .stage-head h2{font-size:18px;}
+  .tool-shell .gate-chip{font-size:11.5px; font-weight:700; color:var(--navy); background:var(--lilac-tint); padding:4px 12px;}
+  .tool-shell .purpose{color:var(--ink-2); margin-bottom:16px; max-width:75ch; font-size:13.5px;}
+
+  .tool-shell .ck-group{font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+    color:var(--ink-3); margin:16px 0 4px; border-bottom:1px dashed var(--line); padding-bottom:4px;}
+  .tool-shell label.ck{display:grid; grid-template-columns:16px 1fr; gap:9px; align-items:start; font-size:13.5px; padding:5px 0; cursor:pointer;}
+  .tool-shell label.ck input{margin-top:2px; width:15px; height:15px; accent-color:var(--navy);}
+
+  /* completeness: Yes/No per item (present vs missing). No = return to provider. */
+  .tool-shell .ck-yn{display:flex; align-items:flex-start; gap:14px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+  .tool-shell .ck-yn:last-child{border-bottom:0;}
+  .tool-shell .cyn-text{flex:1; color:var(--ink); line-height:1.4;}
+  /* sliding segmented capsule: one rounded track, a coloured knob slides to Yes/No.
+     Deliberately NOT brand-squared (radius 0) — this is a toggle, not a form control,
+     and the round shape + motion is what makes it feel like one. */
+  .tool-shell .yn-controls{position:relative; flex:none; display:inline-flex; width:112px; background:var(--lilac-tint);
+    border-radius:999px; padding:3px;}
+  .tool-shell .yn-knob{position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:999px;
+    background:var(--lilac-tint-2); transition:transform .18s ease, background-color .18s ease; z-index:1;}
+  .tool-shell .yn-controls.on-yes .yn-knob{background:var(--ok);}
+  .tool-shell .yn-controls.on-no .yn-knob{background:var(--bad); transform:translateX(100%);}
+  .tool-shell .yn-btn{position:relative; z-index:2; flex:1; font:inherit; font-size:12px; font-weight:700; padding:7px 0;
+    background:none; color:var(--ink-3); border:0; border-radius:999px; cursor:pointer; transition:color .18s ease;}
+  .tool-shell .yn-btn:disabled{cursor:not-allowed;}
+  .tool-shell .yn-controls.on-yes .yn-btn.yes-side, .tool-shell .yn-controls.on-no .yn-btn.no-side{color:#fff;}
+  .tool-shell .ck-yn.rf-removed .cyn-text{text-decoration:line-through; opacity:.5;}
+  /* Stage 1 return-for-completion banner */
+  .tool-shell .s1-return{margin-top:16px; padding:13px 16px; background:var(--bad-soft); border:2px solid var(--bad); color:var(--ink); font-size:13px; line-height:1.5;}
+  .tool-shell .s1-return.sent{background:var(--warn-soft,#fff6e0); border-color:var(--warn,#b7791f);}
+  .tool-shell .s1-return .s1-scheme{font-size:12px; color:var(--ink-3);}
+  .tool-shell .s1-return-log{margin-top:9px; padding-top:8px; border-top:1px solid currentColor; font-size:12px; color:var(--ink-3);}
+  .tool-shell .s1-return-log div+div{margin-top:2px;}
+  .tool-shell .rf-why{width:100%; font:inherit; font-size:12.5px; padding:6px 8px; border:1px solid var(--ink-3); margin-top:6px; background:#fff;}
+  .tool-shell .s1-return-btn{display:inline-block; margin-top:9px; font:inherit; font-weight:700; font-size:12.5px;
+    background:var(--bad); color:#fff; border:0; padding:9px 15px; cursor:pointer;}
+  .tool-shell .s1-return-btn:hover{background:#8f1d16;}
+
+  /* Stage 5 moderation: Approve / Push back with a signed approver + push-back reason */
+  .tool-shell .mod-signin{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:14px;
+    padding:11px 14px; background:var(--lilac-tint); border:2px solid var(--lilac);}
+  .tool-shell .mod-signin label{font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--navy);}
+  .tool-shell .mod-signin input{border:2px solid var(--line); padding:7px 10px; font:inherit; font-size:13.5px; background:var(--surface); min-width:200px;}
+  .tool-shell .mod-signin input:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .mod-signin input.flash{outline:2px solid var(--bad); outline-offset:0; border-color:var(--bad);}
+  .tool-shell .mod-signin .mod-as{font-size:12.5px; color:var(--ink-2);}
+  .tool-shell .mod-signin .mod-as b{color:var(--navy);}
+  .tool-shell .mod-row{padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+  .tool-shell .mod-row:last-child{border-bottom:0;}
+  .tool-shell .mod-line{display:flex; align-items:flex-start; gap:14px;}
+  .tool-shell .mod-text{flex:1; color:var(--ink); line-height:1.4;}
+  .tool-shell .mod-right{flex:none; display:flex; align-items:center; gap:10px;}
+  /* circular, matching the toggle capsules' fully-rounded look (and the timeline step nodes);
+     border-radius:999px rather than 50% so the rare 3-4 letter initials still round off cleanly
+     as a pill instead of clipping, while the common 2-letter case renders as a true circle. */
+  .tool-shell .mod-by{display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px;
+    border-radius:999px; background:var(--navy); color:#fff; font-size:12px; font-weight:700; letter-spacing:.5px; cursor:default;}
+  .tool-shell .mod-by.unsigned{background:var(--warn); }
+  /* ---------- generic sliding capsule: same look as the Stage 1 Yes/No toggle,
+     reused for moderation (Approve/Push back) and indicator rating (Met/Not met,
+     and Met/Partial/Not met/N/A). One rounded lilac-tint track; a knob slides to
+     whichever segment is picked and recolours to what that value means; unset =
+     knob hidden, all labels neutral ink. Deliberately NOT brand-squared. ----------*/
+  /* segment width is a fixed CSS value per option-count (--seg), NOT measured from the DOM —
+     stage panels are display:none when inactive (see .stage), so any JS offsetWidth/offsetLeft
+     read at paint time would return 0 and permanently misplace the knob. Pure CSS percentage
+     transforms resolve correctly whenever the element is eventually shown. */
+  /* justify-self:end stops the grid item stretching to match the evidence field's full column
+     width below it (a CSS Grid default) — the capsule should hug its own content, right-aligned. */
+  .tool-shell .cap{position:relative; display:inline-flex; justify-self:end; background:var(--lilac-tint); border-radius:999px; padding:3px;}
+  .tool-shell .cap.n2{--seg:84px;} .cap.n3{--seg:92px;} .cap.n4{--seg:66px;}
+  .tool-shell .cap-knob{position:absolute; top:3px; bottom:3px; left:3px; width:var(--seg); border-radius:999px; background:var(--lilac-tint-2);
+    opacity:0; transition:transform .18s ease, background-color .18s ease, opacity .18s ease; z-index:1;}
+  .tool-shell .cap-btn{position:relative; z-index:2; width:var(--seg); font:inherit; font-size:12px; font-weight:700; padding:7px 0;
+    text-align:center; background:none; color:var(--ink-3); border:0; border-radius:999px; cursor:pointer; white-space:nowrap; transition:color .18s ease;}
+  .tool-shell .cap-btn:disabled{cursor:not-allowed;}
+  .tool-shell .cap-btn.active{color:#fff;}
+  .tool-shell .mod-note{margin-top:8px; display:none;}
+  .tool-shell .mod-note.show{display:block;}
+  .tool-shell .mod-note textarea{width:100%; border:2px solid var(--bad); background:var(--surface); padding:8px 10px; font:inherit; font-size:13px; resize:vertical;}
+  .tool-shell .mod-note .mn-label{font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-2); margin-bottom:4px;}
+  .tool-shell .mod-row.rf-removed .mod-text{text-decoration:line-through; opacity:.5;}
+
+  /* ---------- Stage 7 approval deliverables ---------- */
+  .tool-shell .deliverables{margin-top:18px; background:var(--surface); border:2px solid var(--line); padding:20px 22px;}
+  .tool-shell .dlv-h{font-size:15px; margin-bottom:12px;}
+  .tool-shell .dlv-outcome-fields{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px 18px; margin-bottom:16px;
+    padding:12px 14px; background:var(--ok-soft); border:2px solid var(--ok);}
+  .tool-shell .dlv-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:760px){ .tool-shell .dlv-grid{grid-template-columns:1fr;}}
+  .tool-shell .dlv-card{border:2px solid var(--line); padding:15px 16px;}
+  .tool-shell .dlv-card h4{font-size:13.5px; color:var(--navy); margin-bottom:6px;}
+  .tool-shell .dlv-card p{font-size:12.5px; color:var(--ink-2); margin-bottom:10px;}
+  .tool-shell .dlv-btn{font:inherit; font-weight:600; font-size:12.5px; padding:8px 14px; background:var(--navy); color:#fff; border:0; cursor:pointer;}
+  .tool-shell .dlv-btn:hover{background:var(--navy-deep);}
+  .tool-shell .dlv-btn.ghost{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:6px 12px;}
+  .tool-shell .dlv-actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .tool-shell .register-record{border:1px solid var(--line); background:var(--paper-2); padding:8px 12px; margin-bottom:8px;}
+  .tool-shell .rr-row{display:flex; justify-content:space-between; gap:14px; font-size:12px; padding:2px 0; border-bottom:1px dashed var(--line);}
+  .tool-shell .rr-row:last-child{border-bottom:0;}
+  .tool-shell .rr-row span{color:var(--ink-3);}
+  .tool-shell .rr-row b{color:var(--ink); text-align:right;}
+  .tool-shell .verify-string{font-size:12px; color:var(--ok); background:var(--ok-soft); padding:7px 10px; margin-bottom:8px;}
+  .tool-shell .dlv-copy-status{font-size:12px; color:var(--ok); font-weight:600; margin-top:10px; min-height:16px;}
+  /* badge card */
+  .tool-shell .badge-card{display:flex; gap:14px; align-items:center; flex-wrap:wrap; padding:12px; background:var(--navy); margin-bottom:8px;}
+  .tool-shell .badge-mark{flex:none; width:118px; text-align:center; color:#fff; border:2px solid var(--lilac); padding:10px 6px;}
+  .tool-shell .badge-mark .bm-cpd{font-size:26px; font-weight:800; letter-spacing:2px; line-height:1;}
+  .tool-shell .badge-mark .bm-acc{font-size:10px; font-weight:700; letter-spacing:2px; color:var(--lilac);}
+  .tool-shell .badge-mark .bm-hours{font-size:10.5px; margin-top:6px; color:#D9D6F0;}
+  .tool-shell .badge-mark .bm-ref{font-size:11px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums;}
+  .tool-shell .badge-qr{display:flex; gap:10px; align-items:center;}
+  .tool-shell .qr-ph{width:64px; height:64px; flex:none; display:flex; align-items:center; justify-content:center;
+    background:repeating-linear-gradient(0deg,#fff 0 5px,#c9c5e4 5px 7px),repeating-linear-gradient(90deg,rgba(255,255,255,.6) 0 5px,transparent 5px 10px);
+    border:2px solid #fff; color:var(--navy); font-weight:800; font-size:12px;}
+  .tool-shell .qr-note{font-size:10.5px; color:#D9D6F0; line-height:1.35;}
+  .tool-shell .qr-flag{color:var(--lilac); font-style:italic;}
+  .tool-shell .verify-url-line{font-size:11.5px; color:var(--ink-3); word-break:break-all;}
+  .tool-shell .verify-url-line code{background:var(--lilac-tint); color:var(--navy); padding:1px 5px;}
+
+  /* client status page — preview modal (the generated page itself is fully self-contained,
+     styled separately inside buildClientStatusHTML — this is just the assessor-side wrapper) */
+
+  /* unit specification document */
+  .tool-shell .us-inner{max-width:820px;}
+  .tool-shell .us-print{background:var(--teal); color:var(--navy); border:0; font:inherit; font-weight:700; font-size:13px; padding:8px 15px; cursor:pointer; margin-right:8px;}
+  .tool-shell .us-doc{padding:26px 30px;}
+  .tool-shell .us-head{border-bottom:3px solid var(--navy); padding-bottom:12px; margin-bottom:18px;}
+  .tool-shell .us-brand{font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--lilac-strong);}
+  .tool-shell .us-title{font-size:22px; font-weight:700; color:var(--navy); margin-top:4px;}
+  .tool-shell .us-cert{display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; border:2px solid var(--navy); padding:18px 20px; margin-bottom:18px;}
+  .tool-shell .us-activity{font-size:19px; font-weight:700; color:var(--navy);}
+  .tool-shell .us-provider{font-size:14px; color:var(--ink-2); margin-bottom:12px;}
+  .tool-shell .us-dl{display:grid; grid-template-columns:auto 1fr; gap:4px 16px; font-size:13px;}
+  .tool-shell .us-dl dt{color:var(--ink-3);}
+  .tool-shell .us-dl dd{font-weight:600; color:var(--ink);}
+  .tool-shell .us-qr{text-align:center; flex:none;}
+  .tool-shell .us-qr .qr-ph{width:96px; height:96px; margin:0 auto 6px;}
+  .tool-shell .us-verify{font-size:11px; color:var(--ink-3);}
+  .tool-shell .us-verify code{font-size:10.5px; word-break:break-all;}
+  .tool-shell .us-section{margin-bottom:14px;}
+  .tool-shell .us-section h4{font-size:13px; color:var(--navy); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px;}
+  .tool-shell .us-section p{font-size:13px; color:var(--ink-2); line-height:1.5;}
+  .tool-shell .us-foot{margin-top:20px; padding-top:12px; border-top:1px solid var(--line); font-size:11px; color:var(--ink-3);}
+  /* print: show only the unit spec doc */
+
+  .tool-shell .irow{display:grid; grid-template-columns:80px 1fr 330px; gap:12px; padding:10px 0;
+    border-bottom:1px solid var(--line); align-items:start;}
+  .tool-shell .irow:last-child{border-bottom:0;}
+  @media (max-width:820px){ .tool-shell .irow{grid-template-columns:80px 1fr;} .tool-shell .irow .ictl{grid-column:1/-1;}}
+  .tool-shell .irow .iid{font-weight:700; color:var(--navy); font-size:13px; white-space:nowrap;}
+  .tool-shell .irow .iid .mtag{display:block; font-size:10px; color:var(--warn);}
+  .tool-shell .irow .itext{font-size:13px; color:var(--ink-2);}
+  /* rating capsule sits above the evidence field, full column width — needed for the
+     4-segment Met/Partial/Not-met/N/A capsule, and kept the same for the 2-segment
+     Met/Not-met gate capsule so both rating types look consistent. */
+  .tool-shell .irow .ictl{display:grid; grid-template-columns:1fr; gap:7px;}
+  .tool-shell .irow input[type="text"]{border:2px solid var(--line); padding:6px 8px; font:inherit; font-size:12.5px; width:100%; background:var(--surface);}
+  .tool-shell .irow input:focus{outline:2px solid var(--teal); outline-offset:0;}
+  /* per-step evidence: one labelled field for each guidance step ("the obvious route"),
+     collapsed behind a counter pill so 61-row stages stay scannable. The single headline
+     field below it is kept — it feeds provider notices and the fix list. */
+  .tool-shell .ev-toggle{justify-self:end; font:inherit; font-size:11.5px; font-weight:700; letter-spacing:.3px;
+    background:none; border:1px dashed var(--line); color:var(--ink-3); border-radius:999px; padding:4px 12px; cursor:pointer;}
+  .tool-shell .ev-toggle:hover{border-color:var(--lilac-strong); color:var(--navy);}
+  .tool-shell .ev-toggle.done{border-style:solid; border-color:var(--ok); color:var(--ok); background:var(--ok-soft);}
+  .tool-shell .ev-toggle.nudge{border-style:solid; border-color:var(--warn); color:#8a6400; background:var(--warn-soft);}
+  .tool-shell .ev-toggle.open{border-style:solid; border-color:var(--lilac-strong); color:var(--navy); background:var(--lilac-tint);}
+  .tool-shell .ev-steps{display:none; border:1px dashed var(--lilac); background:var(--lilac-tint); padding:10px 12px;}
+  .tool-shell .ev-steps.open{display:grid; gap:9px;}
+  .tool-shell .ev-step{display:block;}
+  .tool-shell .ev-step-t{display:block; font-size:11.5px; color:var(--ink-2); margin-bottom:3px; line-height:1.35;}
+  .tool-shell .irow.na{opacity:.5;} .irow.na .ictl{display:block;}
+  .tool-shell .irow.na .cap, .tool-shell .irow.na input, .tool-shell .irow.na .ev-toggle, .tool-shell .irow.na .ev-steps{display:none;}
+  .tool-shell .irow .na-msg{display:none;}
+  .tool-shell .irow.na .na-msg{display:inline-block; font-size:11.5px; font-weight:700; color:var(--ink-3);
+    border:1px dashed var(--ink-3); padding:4px 9px;}
+
+  .tool-shell .note-label{font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3); margin:16px 0 5px;}
+
+  /* derivation */
+  .tool-shell .deriv{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px; margin:8px 0 4px;}
+  .tool-shell .deriv .cell{border:2px solid var(--line); padding:12px 14px;}
+  .tool-shell .deriv .cell b{display:block; font-size:22px; color:var(--navy); font-variant-numeric:tabular-nums;}
+  .tool-shell .deriv .cell span{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ink-3);}
+  .tool-shell .deriv .cell.hot b{color:var(--bad);}
+  .tool-shell .deriv .cell.fine b{color:var(--ok);}
+
+  /* fix list */
+  .tool-shell .fixlist{margin-top:6px;}
+  /* the single deferral (Stage 6) */
+  .tool-shell .deferral{margin-top:6px; padding:12px 16px; border:2px solid var(--ink); background:var(--surface); font-size:13px; line-height:1.5;}
+  .tool-shell .deferral.none{border-style:dashed; border-color:var(--ink-3);}
+  .tool-shell .deferral.open{border-color:var(--warn); background:var(--warn-soft,#fff6e0);}
+  .tool-shell .deferral.expired, .tool-shell .deferral.refuse{border-color:var(--bad); background:var(--bad-soft);}
+  .tool-shell .deferral.done{border-color:var(--ok); background:var(--ok-soft);}
+  .tool-shell .def-row+.def-row{margin-top:6px;}
+  .tool-shell .def-ext input{font:inherit; padding:6px 8px; border:1px solid var(--ink-3); background:#fff;}
+  .tool-shell .fixlist .fitem{display:grid; grid-template-columns:90px 1fr; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+  .tool-shell .fixlist .fitem:last-child{border-bottom:0;}
+  .tool-shell .fixlist .fid{font-weight:700; color:var(--bad); white-space:nowrap;}
+  .tool-shell .fixlist .fjob{display:grid; grid-template-columns:90px 1fr; gap:12px; padding:10px 0 6px; margin-top:6px; border-top:2px solid var(--ink); font-size:13.5px;}
+  .tool-shell .fixlist .fjob:first-child{margin-top:0; border-top:0;}
+  .tool-shell .fixlist .fjob.nocause b{color:var(--ink-3); font-weight:600; font-style:italic;}
+  .tool-shell .fixlist .empty{color:var(--ok); font-weight:600; font-size:13.5px; padding:8px 0;}
+
+  /* Stage 6 overview lists — read-only, live from the ratings. Partially-met = what's pulling
+     the score toward conditions; N/A = what's excluded from the available points. */
+  .tool-shell .ovlist{margin-top:6px;}
+  .tool-shell .ovlist .ovitem{display:grid; grid-template-columns:90px 1fr auto; gap:12px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:13px; align-items:start;}
+  .tool-shell .ovlist .ovitem:last-child{border-bottom:0;}
+  .tool-shell .ovlist .ovid{font-weight:700; color:var(--navy); white-space:nowrap;}
+  .tool-shell .ovlist .ovtext{color:var(--ink-2);}
+  .tool-shell .ovlist .ovtext em{color:var(--ink-3);}
+  .tool-shell .ovlist .ovtag{font-size:10.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; padding:2px 8px; border-radius:999px;}
+  .tool-shell .ovlist .ovtag.partial{color:var(--warn); background:var(--warn-soft);}
+  .tool-shell .ovlist .ovtag.na{color:var(--ink-2); background:var(--lilac-tint);}
+  /* conditions register (Stage 6) and its echo on the surveillance cards */
+  .tool-shell .condreg{margin-top:6px; font-size:13px;}
+  .tool-shell .condreg .cr-add{display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:10px 12px; border:1px dashed var(--ink-3); margin-bottom:8px;}
+  .tool-shell .condreg .cr-add input, .tool-shell .condreg .cr-add select{font:inherit; padding:7px 9px; border:1px solid var(--ink-3); background:#fff;}
+  .tool-shell .condreg .cr-add .cr-text{flex:1; min-width:260px;}
+  .tool-shell .condreg .cr-item{display:grid; grid-template-columns:110px 1fr auto; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); align-items:start;}
+  .tool-shell .condreg .cr-id{font-weight:700; white-space:nowrap;}
+  .tool-shell .condreg .cr-item.met .cr-id{color:var(--ok);} .condreg .cr-item.unmet .cr-id{color:var(--bad);} .condreg .cr-item.open .cr-id{color:var(--warn);} .condreg .cr-item.overdue .cr-id{color:var(--bad);}
+  .tool-shell .cr-meta{font-size:12px; color:var(--ink-3); margin-top:2px;}
+  .tool-shell .cr-status{display:flex; gap:6px; align-items:center;}
+  .tool-shell .cr-pill{font:inherit; font-size:11px; font-weight:700; padding:3px 9px; border:1px solid currentColor; background:transparent; cursor:pointer; color:var(--ink);}
+  .tool-shell .cr-pill.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .tool-shell .sv-conds{margin-top:10px;} .sv-cond{padding:6px 0; border-bottom:1px dashed var(--line); font-size:13px;} .sv-cond.met b{color:var(--ok);} .sv-cond.unmet b{color:var(--bad);}
+  .tool-shell .ovlist .empty{color:var(--ink-3); font-size:13px; padding:6px 0;}
+
+  /* Stage 6 provider communications log — consolidated, read-only view of every notice issued
+     on a Not-met gate (persists even after the gate is later re-marked Met), plus the provider's
+     logged responses. Two-way record of what's been said to date. Responses are logged in the
+     notice drawer (the per-gate comms editor); this is the whole-submission rollup. */
+  .tool-shell .comlog{margin-top:6px; display:grid; gap:10px;}
+  .tool-shell .com-card{border:2px solid var(--line); border-left-width:5px; padding:11px 14px;}
+  .tool-shell .com-card.open{border-left-color:var(--warn);}   /* gate still Not met */
+  .tool-shell .com-card.resolved{border-left-color:var(--ok);}  /* gate since re-marked Met */
+  .tool-shell .com-head{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline; margin-bottom:6px;}
+  .tool-shell .com-gate{font-weight:700; color:var(--navy); font-size:13.5px;}
+  .tool-shell .com-badge{font-size:10.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:2px 8px; border-radius:999px;}
+  .tool-shell .com-badge.open{color:var(--warn); background:var(--warn-soft);}
+  .tool-shell .com-badge.resolved{color:var(--ok); background:var(--ok-soft);}
+  .tool-shell .com-meta{font-size:11.5px; color:var(--ink-3); margin-left:auto;}
+  .tool-shell .com-line{font-size:12.5px; line-height:1.45; margin:3px 0;}
+  .tool-shell .com-line .com-dir{font-weight:700; color:var(--ink-3); text-transform:uppercase; font-size:10.5px; letter-spacing:.5px; margin-right:6px;}
+  .tool-shell .com-line.out{color:var(--ink);}
+  .tool-shell .com-line.in{color:var(--ink); padding-left:14px; border-left:2px solid var(--lilac);}
+  .tool-shell .com-when{color:var(--ink-3); font-size:11px; margin-left:6px;}
+  .tool-shell .com-await{font-size:12px; color:var(--ink-3); font-style:italic; padding-left:14px;}
+  .tool-shell .com-act{margin-top:8px;}
+  .tool-shell .com-act .rfb{padding:4px 11px; font-size:11.5px;}
+  .tool-shell .comlog .empty{color:var(--ink-3); font-size:13px; padding:6px 0;}
+  /* notice-drawer responses */
+
+  /* remediation log: a composer (typed entry + Add) above a dated, append-only list —
+     replaces a single free-text scratchpad with entries you can actually see build up over time */
+  .tool-shell .rlog-add{display:flex; gap:10px; align-items:flex-start; margin-top:4px;}
+  .tool-shell .rlog-add textarea{flex:1; border:2px solid var(--line); padding:8px 10px; font:inherit; font-size:13px; resize:vertical;}
+  .tool-shell .rlog-add textarea:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .rlog-add .rfa{flex:none; align-self:stretch;}
+  .tool-shell .rlog-list{margin-top:14px;}
+  .tool-shell .rlog-item{display:grid; grid-template-columns:150px 1fr auto; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px; align-items:start;}
+  .tool-shell .rlog-item:last-child{border-bottom:0;}
+  .tool-shell .rlog-when{font-weight:700; color:var(--navy); white-space:nowrap; font-size:12.5px;}
+  .tool-shell .rlog-text{color:var(--ink); white-space:pre-wrap; line-height:1.4;}
+  .tool-shell .rlog-remove{font:inherit; font-size:11px; font-weight:600; background:none; border:1px dashed var(--ink-3); color:var(--ink-3); padding:3px 9px; cursor:pointer; white-space:nowrap;}
+  .tool-shell .rlog-remove:hover{border-color:var(--bad); color:var(--bad);}
+  .tool-shell .rlog-empty{color:var(--ink-3); font-size:13px; padding:6px 0;}
+
+  /* verdict / scorecard */
+  .tool-shell .verdict{padding:20px 24px; color:#fff; margin-bottom:16px;}
+  .tool-shell .verdict.v-ok{background:var(--ok);} .verdict.v-warn{background:var(--warn);}
+  .tool-shell .verdict.v-bad{background:var(--bad);} .verdict.v-defer{background:var(--defer);}
+  .tool-shell .verdict.v-idle{background:var(--ink-3);}
+  .tool-shell .verdict .badge{font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:.85;}
+  .tool-shell .verdict h2{font-size:22px; color:#fff; margin:4px 0 6px;}
+  .tool-shell .verdict p{font-size:13.5px; max-width:80ch; opacity:.95;}
+  .tool-shell .scorebars{display:grid; gap:9px; margin-top:6px;}
+  .tool-shell .sbar{display:grid; grid-template-columns:250px 1fr 120px; gap:12px; align-items:center; font-size:13px;}
+  @media (max-width:640px){ .tool-shell .sbar{grid-template-columns:1fr; gap:3px;}}
+  .tool-shell .sbar .track{background:var(--lilac-tint); height:14px; border-radius:999px; overflow:hidden;}
+  /* width-only transition so the bar grows in on first paint (buildScorecard starts every
+     fill at 0%) and resizes smoothly on later recomputes, rather than jumping straight to value */
+  .tool-shell .sbar .fill{height:100%; border-radius:999px; background:var(--ok); transition:width .9s cubic-bezier(.16,1,.3,1);}
+  .tool-shell .sbar .fill.mid{background:var(--warn);} .sbar .fill.low{background:var(--bad);}
+  .tool-shell .sbar .pct{font-weight:700; text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px;}
+
+  .tool-shell .footnote{margin-top:26px; font-size:12px; color:var(--ink-3);}
+  .tool-shell .pill{display:inline-block; padding:2px 10px; font-size:11px; font-weight:700;}
+  .tool-shell .pill.mand{background:var(--warn-soft); color:var(--warn);}
+
+  /* ---------- source / provenance info ---------- */
+  /* plain-English assessor guidance shown above the sources in the same popup */
+
+  /* ---------- caseload dashboard ---------- */
+  .tool-shell .dash{position:fixed; inset:0; z-index:80; background:rgba(23,18,67,.55); display:none; padding:24px;}
+  .tool-shell .dash.open{display:block;}
+
+  /* ---------- provider-notice email composer ---------- */
+
+  /* ---------- secondary tools (below the assessment) ---------- */
+  .tool-shell .btn2{font:inherit; font-weight:600; font-size:13px; padding:9px 16px; cursor:pointer;
+    background:var(--surface); color:var(--navy); border:2px solid var(--navy);}
+  .tool-shell .btn2:hover{background:var(--lilac-tint);}
+
+  /* ---------- global error strip (pilot safety net) ---------- */
+  .tool-shell #err-strip{position:fixed; left:0; right:0; bottom:0; z-index:99; display:none;
+    background:var(--bad); color:#fff; font-size:12.5px; font-weight:600; padding:10px 18px;}
+  .tool-shell #err-strip.show{display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  .tool-shell #err-strip button{background:var(--surface); color:var(--bad); border:0; font:inherit; font-weight:700;
+    font-size:12px; padding:6px 12px; cursor:pointer; flex:none;}
+
+  /* base action-button pair, reused unscoped (fixlist, Stage 6) and scoped
+     (.rf-panel/.np-actions/.mail-actions override with their own spacing) */
+  .tool-shell .rfa{background:var(--navy); color:#fff; border:0; padding:8px 14px; font:inherit; font-size:12px;
+    font-weight:600; cursor:pointer; text-decoration:none; display:inline-block;}
+  .tool-shell .rfa:hover{background:var(--navy-deep);}
+  .tool-shell .rfb{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:6px 12px; font:inherit;
+    font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block;}
+  .tool-shell .rfb:hover{background:var(--lilac-tint);}
+
+  /* ---------- refine layer (test & refine build) ---------- */
+  .tool-shell .rf-btn:hover{color:var(--navy); border-color:var(--navy);}
+  .tool-shell .rf-btn .rf-flag{color:var(--warn);}
+  .tool-shell .irow.rf-removed .itext, .tool-shell .irow.rf-removed .iid{text-decoration:line-through; opacity:.5;}
+  .tool-shell .irow.rf-removed .ictl{display:none;}
+  .tool-shell .ck.rf-removed span{text-decoration:line-through; opacity:.5;}
+  .tool-shell .purpose.rf-removed{text-decoration:line-through; opacity:.55;}
+
+  /* ---------- hard-stop provider-notice panel ---------- */
+  /* provider-notice chip: traffic-light colour on the BORDER only, text stays dark/readable.
+     Not contacted = red (action). Contacted = amber (with the provider, awaiting fix — the 'sent'
+     state, NOT green: a notice sent is not a pass). */
+  .tool-shell .irow.na .np-chip{display:none !important;}
+
+  /* ---------- accessibility panel ---------- */
+
+
+  /* ---- the tool's own base rules, scoped so they win inside the shell ---- */
+  .tool-shell{background:var(--paper-2); color:var(--ink); line-height:1.55; font-size:15px; padding-bottom:185px; margin:-26px -22px -60px; min-height:calc(100vh - 62px);}
+  .tool-shell .wrap{max-width:1100px; margin:0 auto; padding:0 20px;}
+  .tool-shell h1,.tool-shell h2,.tool-shell h3{line-height:1.15; letter-spacing:-0.02em; font-weight:700; color:var(--navy); margin:0;}
+  .tool-shell .btn{font:inherit; font-weight:600; font-size:13.5px; padding:9px 16px; cursor:pointer; border:2px solid transparent; background:var(--navy); color:#fff; display:inline-flex; align-items:center; gap:6px; text-decoration:none;}
+  .tool-shell .btn-teal{background:var(--teal); color:var(--navy);} .tool-shell .btn-teal:hover{background:#00AFA3;}
+  .tool-shell .btn-outline{background:transparent; color:#fff; border-color:rgba(255,255,255,.5);} .tool-shell .btn-outline:hover{border-color:#fff;}
+  .tool-shell .btn-ghost{background:transparent; color:var(--navy); border-color:var(--navy);}
+  .tool-shell .btn-tiny{font-size:11.5px; padding:4px 10px;}
+  .tool-shell .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .tool-shell .panel{background:var(--surface); border:2px solid var(--line); padding:22px 24px; margin:0;}
+  .tool-shell .panel+.panel{margin-top:16px;}
+  .tool-shell textarea,.tool-shell input[type="text"],.tool-shell input[type="email"],.tool-shell input[type="number"],.tool-shell input:not([type]),.tool-shell select{width:100%; border:2px solid var(--line); padding:8px 10px; font:inherit; font-size:13.5px; background:var(--surface); color:var(--ink);}
+  .tool-shell textarea{padding:10px 12px; resize:vertical;}
+  .tool-shell textarea:focus,.tool-shell input:focus,.tool-shell select:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .field{margin-bottom:12px;} .tool-shell .field label{display:block; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px;}
+  .tool-shell .stage{display:block; margin-top:18px;}
+  .tool-shell .muted{color:var(--ink-3);}
+  .tool-shell .alert{padding:10px 12px; border:2px solid var(--line); margin:0 0 12px; font-size:13.5px; background:var(--surface);}
+  .tool-shell .alert-bad{border-color:var(--bad); background:var(--bad-soft);} .tool-shell .alert-ok{border-color:var(--ok); background:var(--ok-soft);} .tool-shell .alert-warn{border-color:var(--warn); background:var(--warn-soft);}
+  .tool-shell .step{text-decoration:none;}
+  .tool-shell .lock-note{display:block; margin:0 0 12px;}
+
+  /* ---- refine, info popover, hard-stop chip, notice drawer, comms log, mail composer (verbatim) ---- */
+  .tool-shell .rf-why{width:100%; font:inherit; font-size:12.5px; padding:6px 8px; border:1px solid var(--ink-3); margin-top:6px; background:#fff;}
+  .tool-shell .dlv-lock{font-size:13px; color:var(--ink-2); background:var(--paper-2); border:2px dashed var(--line); padding:12px 14px;}
+  .tool-shell .np-group{margin-top:7px; font-size:12.5px; color:var(--ink-2);} .np-group label{display:flex; gap:7px; align-items:flex-start; cursor:pointer;} .np-group input{margin-top:3px;}
+  .tool-shell .comlog{margin-top:6px; display:grid; gap:10px;}
+  .tool-shell .com-card{border:2px solid var(--line); border-left-width:5px; padding:11px 14px;}
+  .tool-shell .com-card.open{border-left-color:var(--warn);}   /* gate still Not met */
+  .tool-shell .com-card.resolved{border-left-color:var(--ok);}  /* gate since re-marked Met */
+  .tool-shell .com-head{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline; margin-bottom:6px;}
+  .tool-shell .com-gate{font-weight:700; color:var(--navy); font-size:13.5px;}
+  .tool-shell .com-badge{font-size:10.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:2px 8px; border-radius:999px;}
+  .tool-shell .com-badge.open{color:var(--warn); background:var(--warn-soft);}
+  .tool-shell .com-badge.resolved{color:var(--ok); background:var(--ok-soft);}
+  .tool-shell .com-meta{font-size:11.5px; color:var(--ink-3); margin-left:auto;}
+  .tool-shell .com-line{font-size:12.5px; line-height:1.45; margin:3px 0;}
+  .tool-shell .com-line .com-dir{font-weight:700; color:var(--ink-3); text-transform:uppercase; font-size:10.5px; letter-spacing:.5px; margin-right:6px;}
+  .tool-shell .com-line.out{color:var(--ink);}
+  .tool-shell .com-line.in{color:var(--ink); padding-left:14px; border-left:2px solid var(--lilac);}
+  .tool-shell .com-when{color:var(--ink-3); font-size:11px; margin-left:6px;}
+  .tool-shell .com-await{font-size:12px; color:var(--ink-3); font-style:italic; padding-left:14px;}
+  .tool-shell .com-act{margin-top:8px;}
+  .tool-shell .com-act .rfb{padding:4px 11px; font-size:11.5px;}
+  .tool-shell .comlog .empty{color:var(--ink-3); font-size:13px; padding:6px 0;}
+  .tool-shell .np-resp{margin-top:16px; border-top:1px dashed var(--line); padding-top:14px;}
+  .tool-shell .np-resp .npr-item{font-size:12.5px; line-height:1.4; padding:6px 0; border-bottom:1px dashed var(--line);}
+  .tool-shell .np-resp .npr-item:last-child{border-bottom:0;}
+  .tool-shell .np-resp .npr-when{display:block; font-size:10.5px; font-weight:700; color:var(--ink-3); letter-spacing:.4px;}
+  .tool-shell .np-resp .npr-none{font-size:12px; color:var(--ink-3); font-style:italic;}
+  .tool-shell .np-resp-add{display:flex; gap:8px; margin-top:10px;}
+  .tool-shell .np-resp-add textarea{flex:1; border:2px solid var(--line); padding:7px 9px; font:inherit; font-size:12.5px; resize:vertical;}
+  .tool-shell .np-resp-add textarea:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .rlog-add{display:flex; gap:10px; align-items:flex-start; margin-top:4px;}
+  .tool-shell .rlog-add textarea{flex:1; border:2px solid var(--line); padding:8px 10px; font:inherit; font-size:13px; resize:vertical;}
+  .tool-shell .rlog-add textarea:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .rlog-add .rfa{flex:none; align-self:stretch;}
+  .tool-shell .rlog-list{margin-top:14px;}
+  .tool-shell .rlog-item{display:grid; grid-template-columns:150px 1fr auto; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px; align-items:start;}
+  .tool-shell .rlog-item:last-child{border-bottom:0;}
+  .tool-shell .rlog-when{font-weight:700; color:var(--navy); white-space:nowrap; font-size:12.5px;}
+  .tool-shell .rlog-text{color:var(--ink); white-space:pre-wrap; line-height:1.4;}
+  .tool-shell .rlog-remove{font:inherit; font-size:11px; font-weight:600; background:none; border:1px dashed var(--ink-3); color:var(--ink-3); padding:3px 9px; cursor:pointer; white-space:nowrap;}
+  .tool-shell .rlog-remove:hover{border-color:var(--bad); color:var(--bad);}
+  .tool-shell .rlog-empty{color:var(--ink-3); font-size:13px; padding:6px 0;}
+  .tool-shell .src-i{display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+    border:1px solid var(--ink-3); background:none; color:var(--ink-3); font-size:10px; font-weight:700;
+    font-style:italic; font-family:Georgia,'Times New Roman',serif; cursor:pointer; padding:0; line-height:1; flex:none;}
+  .tool-shell .src-i:hover{border-color:var(--navy); color:var(--navy); background:var(--lilac-tint);}
+  .tool-shell .src-pop{position:absolute; z-index:70; width:min(420px,92vw); background:var(--surface); border:2px solid var(--navy);
+    box-shadow:0 10px 34px rgba(23,18,67,.24); display:none;}
+  .tool-shell .src-pop.open{display:block;}
+  .tool-shell .src-pop-head{background:var(--navy); color:#fff; font-size:11px; font-weight:700; letter-spacing:.6px;
+    text-transform:uppercase; padding:9px 12px; display:flex; justify-content:space-between; gap:10px; align-items:center;}
+  .tool-shell .src-pop-head button{background:none; border:0; color:#fff; font-size:18px; line-height:1; cursor:pointer; padding:0 2px;}
+  .tool-shell .src-pop-body{padding:6px 12px 10px; max-height:420px; overflow:auto;}
+  .tool-shell .src-item{padding:8px 0; border-bottom:1px dashed var(--line); font-size:12.5px;}
+  .tool-shell .src-item:last-child{border-bottom:0;}
+  .tool-shell .src-item .sname{font-weight:700; color:var(--navy);}
+  .tool-shell .src-item .swhy{display:block; margin-top:2px; color:var(--ink-2);}
+  .tool-shell .src-sect{font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--lilac-strong); margin:10px 0 4px;}
+  .tool-shell .src-sect:first-child{margin-top:6px;}
+  .tool-shell .g-look{font-size:12.5px; color:var(--ink); line-height:1.5;}
+  .tool-shell .g-steps{margin:6px 0 2px; padding-left:18px; font-size:12.5px; color:var(--ink-2);}
+  .tool-shell .g-steps li{margin:3px 0; line-height:1.45;}
+  .tool-shell .mail-inner{max-width:760px; margin:0 auto; background:var(--surface); border:2px solid var(--navy);
+    max-height:calc(100vh - 48px); display:flex; flex-direction:column;}
+  .tool-shell .mail-head{background:var(--navy); color:#fff; padding:14px 20px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .tool-shell .mail-head h2{color:#fff; font-size:17px;}
+  .tool-shell .mail-head p{font-size:12px; color:var(--lilac); margin-top:3px;}
+  .tool-shell .mail-head button{background:none; border:0; color:#fff; font-size:26px; line-height:1; cursor:pointer;}
+  .tool-shell .mail-body{padding:18px 20px; overflow:auto;}
+  .tool-shell .mail-warn{background:var(--warn-soft); color:var(--warn); font-size:12.5px; padding:9px 12px; margin-bottom:14px;}
+  .tool-shell .mail-field{margin-bottom:12px;}
+  .tool-shell .mail-field label{display:block; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3); margin-bottom:5px;}
+  .tool-shell .mail-field input[type="text"]{width:100%; border:2px solid var(--line); padding:8px 10px; font:inherit; font-size:13.5px;}
+  .tool-shell .mail-field input:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .mail-body-text{width:100%; border:2px solid var(--line); padding:12px; font:inherit; font-size:13px; line-height:1.55; resize:vertical; white-space:pre-wrap;}
+  .tool-shell .mail-body-text:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .mail-actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; align-items:center;}
+  .tool-shell .mail-actions .rfa{background:var(--navy); color:#fff; border:0; padding:9px 16px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block;}
+  .tool-shell .mail-actions .rfa:hover{background:var(--navy-deep);}
+  .tool-shell .mail-actions .rfb{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:7px 14px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block;}
+  .tool-shell .mail-actions .rfb:hover{background:var(--lilac-tint);}
+  .tool-shell .mail-status{font-size:12px; font-weight:600; color:var(--ok); margin-top:10px; min-height:16px;}
+  .tool-shell .mail-note{font-size:11.5px; color:var(--ink-3); margin-top:14px; border-top:1px dashed var(--line); padding-top:10px;}
+  .tool-shell .rfa{background:var(--navy); color:#fff; border:0; padding:8px 14px; font:inherit; font-size:12px;
+    font-weight:600; cursor:pointer; text-decoration:none; display:inline-block;}
+  .tool-shell .rfa:hover{background:var(--navy-deep);}
+  .tool-shell .rfb{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:6px 12px; font:inherit;
+    font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block;}
+  .tool-shell .rfb:hover{background:var(--lilac-tint);}
+  .tool-shell .rf-btn{font:inherit; font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+    color:var(--ink-3); background:none; border:1px dashed var(--ink-3); padding:2px 8px; cursor:pointer;
+    margin-top:6px; display:inline-block;}
+  .tool-shell .rf-btn:hover{color:var(--navy); border-color:var(--navy);}
+  .tool-shell .rf-btn .rf-flag{color:var(--warn);}
+  .tool-shell .rf-panel{display:none; border:2px dashed var(--lilac); background:var(--lilac-tint);
+    padding:12px 14px; margin-top:8px;}
+  .tool-shell .rf-panel.open{display:block;}
+  .tool-shell .rf-panel textarea{font-size:12.5px; background:var(--surface);}
+  .tool-shell .rf-panel .rf-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:8px;}
+  .tool-shell .rf-panel .rfa{background:var(--navy); color:#fff; border:0; padding:8px 14px; font:inherit; font-size:12px; font-weight:600; cursor:pointer;}
+  .tool-shell .rf-panel .rfa:hover{background:var(--navy-deep);}
+  .tool-shell .rf-panel .rfb{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:6px 12px; font:inherit; font-size:12px; font-weight:600; cursor:pointer;}
+  .tool-shell .rf-panel label.rf-nn{display:flex; gap:7px; align-items:center; font-size:12.5px; font-weight:600; cursor:pointer;}
+  .tool-shell .rf-panel label.rf-nn input{width:15px; height:15px; accent-color:var(--bad);}
+  .tool-shell .rf-note{font-size:11px; color:var(--ink-3); margin-top:7px;}
+  .tool-shell .notice-panel{position:fixed; top:0; right:0; height:100%; width:min(430px,100%); background:var(--surface);
+    border-left:4px solid var(--bad); box-shadow:-12px 0 40px rgba(23,18,67,.28); z-index:60;
+    transform:translateX(105%); transition:transform .25s ease; overflow-y:auto; padding-bottom:30px;}
+  .tool-shell .notice-panel.open{transform:translateX(0);}
+  .tool-shell .np-head{background:var(--bad); color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .tool-shell .np-kicker{font-size:10.5px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; opacity:.85;}
+  .tool-shell .np-head h3{color:#fff; font-size:18px; margin-top:2px;}
+  .tool-shell .np-close{background:none; border:0; color:#fff; font-size:24px; cursor:pointer; line-height:1; padding:0 4px;}
+  .tool-shell .np-body{padding:16px 20px;}
+  .tool-shell .np-gate{font-size:13.5px; font-weight:600; color:var(--ink);}
+  .tool-shell .np-expl{font-size:12.5px; color:var(--ink-2); margin-top:8px;}
+  .tool-shell .np-evi{font-size:12.5px; background:var(--bad-soft); color:var(--bad); padding:8px 12px; margin-top:10px;}
+  .tool-shell .np-label{display:block; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3); margin:16px 0 5px;}
+  .tool-shell .np-pills{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:7px;}
+  .tool-shell .np-pill{font:inherit; font-size:12px; font-weight:600; padding:6px 12px; border:2px solid var(--line); background:var(--surface); cursor:pointer;}
+  .tool-shell .np-pill:hover{border-color:var(--navy);}
+  .tool-shell .np-due-input{width:100%; border:2px solid var(--line); padding:8px 10px; font:inherit; font-size:13.5px;}
+  .tool-shell .np-due-input:focus{outline:2px solid var(--teal); outline-offset:0;}
+  .tool-shell .np-hint{font-size:11.5px; color:var(--ink-3); margin-top:7px;}
+  .tool-shell .np-actions{display:flex; gap:10px; margin-top:16px;}
+  .tool-shell .np-actions .rfa{background:var(--navy); color:#fff; border:0; padding:9px 16px; font:inherit; font-size:13px; font-weight:600; cursor:pointer;}
+  .tool-shell .np-actions .rfa:hover{background:var(--navy-deep);}
+  .tool-shell .np-actions .rfb{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:7px 14px; font:inherit; font-size:13px; font-weight:600; cursor:pointer;}
+  .tool-shell .np-status{font-size:12px; font-weight:600; color:var(--ok); margin-top:12px;}
+  .tool-shell .np-chip{grid-column:1/-1; font:inherit; font-size:11.5px; font-weight:700; padding:5px 10px;
+    border:2px solid var(--bad); background:var(--bad-soft); color:var(--ink); cursor:pointer; text-align:left; display:none;}
+  .tool-shell .np-chip.logged{border-color:var(--warn); background:var(--warn-soft); color:var(--ink);}
+  .tool-shell .mail{position:static; background:none; padding:0; display:block; margin-top:12px; border-top:1px dashed var(--line); padding-top:12px;}
+  .tool-shell .mail-inner{max-width:none; border:0;}
+  .tool-shell .src-pop{position:absolute; display:none;} .tool-shell .src-pop.open{display:block;}
+  .tool-shell .rf-panel.open{margin-top:8px; padding:10px 12px;}
+  .tool-shell .notice-panel{transform:translateX(0); z-index:60; overflow:auto; box-shadow:-8px 0 24px rgba(23,18,67,.25);}
+
+  /* base .rfa/.rfb (the tool only scoped them under panels; the pages use them everywhere) */
+  .tool-shell .rfa{background:var(--navy); color:#fff; border:0; padding:9px 16px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .tool-shell .rfa:hover{background:var(--navy-deep);} .tool-shell .rfa:disabled{opacity:.5; cursor:not-allowed;}
+  .tool-shell .rfb{background:var(--surface); color:var(--navy); border:2px solid var(--navy); padding:7px 14px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .tool-shell .rfb:hover{background:var(--lilac-tint);} .tool-shell .rfb:disabled{opacity:.5; cursor:not-allowed;}
+  .tool-shell .rfb.btn-tiny,.tool-shell .rfa.btn-tiny{font-size:11.5px; padding:4px 10px;}
+  .tool-shell .act-row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;} .tool-shell .act-row input,.tool-shell .act-row textarea{flex:1; min-width:200px; width:auto;}
+  .tool-shell .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;} @media (max-width:820px){.tool-shell .grid2{grid-template-columns:1fr;}}
+  .tool-shell .panel+.panel,.tool-shell .stage .panel+.panel{margin-top:16px;}
+  .tool-shell .stage>.panel{margin-top:0;} .tool-shell .stage>.panel~.panel,.tool-shell .stage>.grid2,.tool-shell .stage>.panel~.deferral{margin-top:16px;}
+  .tool-shell .stage-head h2{margin:0;} .tool-shell .stage-head .gate-chip{margin-left:auto;}
+  .tool-shell .status{display:inline-block; padding:3px 9px; font-size:12px; font-weight:700; border:2px solid var(--line); color:var(--ink-2);}
+  .tool-shell .status.ok{border-color:var(--ok); color:var(--ok); background:var(--ok-soft);} .tool-shell .status.warn{border-color:var(--warn); color:#7a4f0e; background:var(--warn-soft);} .tool-shell .status.bad{border-color:var(--bad); color:var(--bad); background:var(--bad-soft);}
+  .tool-shell .tag{display:inline-block; font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; padding:1px 6px; background:var(--lilac-tint-2); color:var(--ink-3); margin-left:6px;}
+  .tool-shell .pills{display:inline-flex; flex-wrap:wrap; gap:6px;} .tool-shell .pills button{font:inherit; font-size:12px; font-weight:600; padding:6px 12px; border:2px solid var(--line); background:var(--surface); cursor:pointer;} .tool-shell .pills button:hover,.tool-shell .pills button.on{border-color:var(--navy);}
+  .tool-shell .plain{list-style:none; padding:0; margin:0;} .tool-shell .plain li{padding:5px 0;}
+  .tool-shell span.bad,.tool-shell b.bad{color:var(--bad); font-weight:600;} .tool-shell b.ok{color:var(--ok);}
+  .tool-shell .fjob{padding:10px 0; border-top:2px solid var(--ink);} .tool-shell .fjob:first-of-type{border-top:0;} .tool-shell .fjob__head{font-size:13.5px; margin-bottom:4px;} .tool-shell .fitem{font-size:13px; padding:4px 0 4px 14px; border-bottom:1px dashed var(--line);}
+  .tool-shell .com{padding:10px 0; border-bottom:1px dashed var(--line);} .tool-shell .com__head{font-size:13.5px; margin-bottom:4px;} .tool-shell .com__line{font-size:13px; padding:3px 0 3px 12px; border-left:3px solid var(--lilac-tint-2);} .tool-shell .com__line.prov{border-left-color:var(--navy);}
+  .tool-shell .cond{padding:8px 0; border-bottom:1px dashed var(--line);} .tool-shell .cond.met b{color:var(--ok);} .tool-shell .cond.unmet b{color:var(--bad);} .tool-shell .cond.overdue b{color:var(--bad);}
+  .tool-shell .rlog{margin-top:10px; padding-top:8px; border-top:1px solid var(--line); font-size:12.5px;}
+  .tool-shell .verdict{padding:18px 22px; margin-bottom:14px; color:#fff; background:var(--ink-3);} .tool-shell .verdict.v-ok{background:var(--ok);} .tool-shell .verdict.v-warn{background:var(--warn);} .tool-shell .verdict.v-bad{background:var(--bad);} .tool-shell .verdict.v-idle{background:var(--ink-3);}
+  .tool-shell .verdict__badge{font-size:11px; letter-spacing:1px; text-transform:uppercase; opacity:.85;} .tool-shell .verdict h2{color:#fff; margin:6px 0 4px; font-size:22px;} .tool-shell .verdict p{margin:0; font-size:14px;}
+  .tool-shell .dim{display:grid; grid-template-columns:200px 1fr 120px; gap:10px; align-items:center; font-size:13px; padding:3px 0;} .tool-shell .dim .track{display:block; height:12px; background:var(--lilac-tint-2); border-radius:999px; overflow:hidden;} .tool-shell .dim .fill{display:block; height:100%; background:var(--ok); border-radius:999px; transition:width .9s cubic-bezier(.16,1,.3,1);} .tool-shell .dim.amber .fill{background:var(--warn);} .tool-shell .dim.red .fill{background:var(--bad);} .tool-shell .dim .dv{font-weight:700; text-align:right; font-size:12px;}
+  .tool-shell .sect{font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--ink-3); margin:16px 0 5px;}
+  .tool-shell .cards{display:grid; grid-template-columns:1fr 1fr; gap:14px;} @media (max-width:760px){.tool-shell .cards{grid-template-columns:1fr;}}
+  .tool-shell .case-card{border:2px solid var(--line); padding:15px 16px; background:var(--surface);} .tool-shell .case-card h3{font-size:13.5px; color:var(--navy); margin-bottom:6px;}
+  .tool-shell .overlay{position:fixed; inset:0; background:rgba(23,18,67,.55); z-index:85; overflow:auto; padding:24px;} .tool-shell .unitspec{max-width:820px; margin:0 auto; background:var(--surface); border:2px solid var(--navy); padding:26px 30px;}
+  .tool-shell .pv{padding:10px 12px; border:1px dashed var(--lilac); background:var(--lilac-tint);}
+  .tool-shell .milestones{list-style:none; padding:0; margin:0;} .tool-shell .milestones li{padding:6px 0; border-bottom:1px dashed var(--line); font-size:13px;}
+  .tool-shell .sv-outcome{display:flex; align-items:center; gap:12px; margin-top:15px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2);} .tool-shell .warnnote{color:#7a4f0e; font-weight:600; font-size:13px;}
+  .tool-shell .sv-conds{margin-top:10px;} .tool-shell .sv-cond{padding:6px 0; border-bottom:1px dashed var(--line); font-size:13px;}
+  .tool-shell .ck-list{list-style:none; padding:0; margin:0;}
+  .tool-shell .calc__grid,.tool-shell .fq{display:none;}
+  @media print{ .tool-shell header.tool,.tool-shell .timeline-sticky,.tool-shell .summary-footer,.tool-shell .no-print{display:none !important;} }
+  /* the platform's top bar sits above the case pages and scrolls away with them: no underlines from its anchor rule */
+  .tool-shell a{text-decoration:none;} .tool-shell .case-strip{display:flex; text-decoration:none; color:var(--ink); background:var(--surface); border:2px solid var(--line);}
+  .tool-shell .step{color:inherit;} .tool-shell .step:hover .num{border-color:var(--navy);}
+  .tool-shell .rf-btn,.tool-shell .src-i{vertical-align:middle;}

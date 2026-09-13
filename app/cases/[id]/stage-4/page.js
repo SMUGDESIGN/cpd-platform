@@ -20,18 +20,18 @@ function HoursCalculator({ doc, update, locked, setNotice }) {
   };
   const d143 = (doc.indicators || {})['1.4.3'] || {};
   return (
-    <div className={'panel calc' + (dv.ready ? (dv.fail ? ' hot' : ' fine') : '')}>
-      <h2>Hours derivation — 1.4.3</h2>
-      <p className="muted">Derive the notional learning time independently from the material (reading at a stated words-per-minute band, media runtime, per-item allowance for activities and assessment). The claim must sit within 20% of your figure.</p>
-      <div className="calc__grid">
-        <div><span>Claimed (from the case setup)</span><b>{dv.claimed != null ? dv.claimed.toFixed(1) + ' h' : '–'}</b></div>
-        <div><span>Derived by the assessor</span><input className="input" inputMode="decimal" value={doc.derived || ''} disabled={locked} onChange={(e) => onDerived(e.target.value)} placeholder="e.g. 5.2" /></div>
-        <div><span>Difference</span><b>{dv.ready ? (dv.over > 0 ? '+' : '') + dv.over + '%' : '–'}</b></div>
-        <div><span>1.4.3</span><b className={dv.ready ? (dv.fail ? 'bad' : 'ok') : ''}>{dv.ready ? (dv.fail ? 'Not met' : 'Met') : '–'}{d143.r && !d143.auto ? ' (hand-set: ' + d143.r + ')' : ''}</b></div>
+    <>
+      <div className="note-label">Hours derivation — 1.4.3</div>
+      <p className="purpose">Derive the notional learning time independently from the material (reading at a stated words-per-minute band, media runtime, per-item allowance for activities and assessment). The claim must sit within 20% of your figure.</p>
+      <div className="deriv">
+        <div className="cell"><b>{dv.claimed != null ? dv.claimed.toFixed(1) : '–'}</b><span>Claimed hours (case setup)</span></div>
+        <div className="cell"><input type="text" inputMode="decimal" value={doc.derived || ''} disabled={locked} onChange={(e) => onDerived(e.target.value)} placeholder="e.g. 5.2" style={{ fontSize: 22, fontWeight: 700, color: 'var(--navy)', padding: '2px 6px' }} /><span>Derived by the assessor</span></div>
+        <div className={'cell' + (dv.ready ? (dv.fail ? ' hot' : ' fine') : '')}><b>{dv.ready ? (dv.over > 0 ? '+' : '') + dv.over + '%' : '–'}</b><span>Difference</span></div>
+        <div className={'cell' + (dv.ready ? (dv.fail ? ' hot' : ' fine') : '')}><b>{dv.ready ? (dv.fail ? 'Not met' : 'Met') : '–'}</b><span>1.4.3{d143.r && !d143.auto ? ' · hand-set: ' + d143.r : ''}</span></div>
       </div>
-      {msg && <p className="muted">{msg}</p>}
-      {derivationFails(doc) && <p className="muted">While the calculator shows a fail, 1.4.3 cannot be set to Met by hand. Manual Not met is always allowed - stricter than the rule is never a risk.</p>}
-    </div>
+      {msg && <p className="np-hint">{msg}</p>}
+      {derivationFails(doc) && <div className="lock-note show">While the calculator shows a fail, 1.4.3 cannot be set to Met by hand. Manual Not met is always allowed — stricter than the rule is never a risk. Correct the derived figure; the gate turns green when the arithmetic does.</div>}
+    </>
   );
 }
 

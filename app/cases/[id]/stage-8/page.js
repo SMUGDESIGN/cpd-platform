@@ -20,12 +20,12 @@ function Mail({ mail, setMail }) {
   const copy = async (t) => { try { await navigator.clipboard.writeText(t); setCopied('Copied.'); } catch { setCopied('Could not copy - select the text.'); } };
   return (
     <div className="mail">
-      {mail.alreadyDone && <div className="alert alert--error">This review is already recorded complete - only send this if you genuinely need the pack again.</div>}
-      <div className="field"><label>To</label><input className="input" value={mail.to} onChange={(e) => setMail({ ...mail, to: e.target.value })} /></div>
-      <div className="field"><label>Subject</label><input className="input" value={mail.subject} onChange={(e) => setMail({ ...mail, subject: e.target.value })} /></div>
-      <div className="field"><label>Body</label><textarea className="input" rows={14} value={mail.body} onChange={(e) => setMail({ ...mail, body: e.target.value })} /></div>
-      <div className="act-row"><button className="btn" onClick={() => copy(mail.body)}>Copy body</button><a className="btn" href={'mailto:' + encodeURIComponent(mail.to) + '?subject=' + encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body)}>Open in email client</a><button className="btn btn--tiny" onClick={() => setMail(null)}>Close</button></div>
-      {copied && <p className="muted">{copied}</p>}
+      {mail.alreadyDone && <div className="lock-note show">This review is already recorded complete - only send this if you genuinely need the pack again.</div>}
+      <div className="field"><label>To</label><input  value={mail.to} onChange={(e) => setMail({ ...mail, to: e.target.value })} /></div>
+      <div className="field"><label>Subject</label><input  value={mail.subject} onChange={(e) => setMail({ ...mail, subject: e.target.value })} /></div>
+      <div className="field"><label>Body</label><textarea  rows={14} value={mail.body} onChange={(e) => setMail({ ...mail, body: e.target.value })} /></div>
+      <div className="act-row"><button className="rfb" onClick={() => copy(mail.body)}>Copy body</button><a className="rfb" href={'mailto:' + encodeURIComponent(mail.to) + '?subject=' + encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body)}>Open in email client</a><button className="rfb btn-tiny" onClick={() => setMail(null)}>Close</button></div>
+      {copied && <p className="purpose">{copied}</p>}
     </div>
   );
 }
@@ -47,16 +47,16 @@ function Visit({ v, doc, update, who, setMail, refinements, setMsg }) {
   const act = (fn) => { const trial = JSON.parse(JSON.stringify(doc)); const res = fn(trial); if (res && res.ok === false) { setMsg(res.reason); return; } setMsg(''); update((d) => fn(d)); };
   return (
     <div className={'panel sv-card ' + v.cls}>
-      <div className="page-head"><h2>{v.name}</h2><span className={'status ' + (v.done ? 'ok' : (v.cls === 'overdue' ? 'bad' : (v.cls === 'duesoon' ? 'warn' : 'idle')))}>{v.pill}</span></div>
+      <div className="stage-head"><h2>{v.name}</h2><span className={'status ' + (v.done ? 'ok' : (v.cls === 'overdue' ? 'bad' : (v.cls === 'duesoon' ? 'warn' : 'idle')))}>{v.pill}</span></div>
       <List items={v.submissions} title="Provider submissions - requested on the anniversary" onAnswer={(id, a) => update((d) => setVisitItem(d, v.key, id, a))} />
-      <p><button className="btn btn--tiny" onClick={() => setMail(composeSurveillanceEmail(doc, refinements, v.key))}>Compose surveillance request email →</button></p>
+      <p><button className="rfb btn-tiny" onClick={() => setMail(composeSurveillanceEmail(doc, refinements, v.key))}>Compose surveillance request email →</button></p>
       <List items={v.drift} title="Assessor drift checks - sample, do not re-assess" onAnswer={(id, a) => update((d) => setVisitItem(d, v.key, id, a))} />
       {v.conditions.length > 0 && (
         <>
           <div className="sect">Conditions to verify at this review</div>
           <ul className="plain">{v.conditions.map((c) => <li key={c.id} className={'cond ' + c.status}><b>{c.text}</b> <span className="muted">{c.refs && c.refs.length ? c.refs.join(', ') + ' · ' : ''}due {condVerifyLabel(c)} · {c.status}{c.closedBy ? ' by ' + c.closedBy : ''}</span>
-            {c.status === 'open' && !closing && <span className="act-row"><button className="btn btn--tiny" onClick={() => setClosing({ id: c.id, status: 'met', note: '' })}>Met</button><button className="btn btn--tiny" onClick={() => setClosing({ id: c.id, status: 'unmet', note: '' })}>Unmet</button></span>}
-            {closing && closing.id === c.id && <span className="act-row"><input className="input" placeholder={closing.status === 'met' ? 'What was seen that shows it is met? (recorded)' : 'What was seen - why is it unmet? (recorded)'} value={closing.note} onChange={(e) => setClosing({ ...closing, note: e.target.value })} /><button className="btn btn--primary btn--tiny" onClick={() => { act((d) => setConditionStatus(d, c.id, closing.status, who, closing.note)); setClosing(null); }}>Record {closing.status}</button><button className="btn btn--tiny" onClick={() => setClosing(null)}>Cancel</button></span>}
+            {c.status === 'open' && !closing && <span className="act-row"><button className="rfb btn-tiny" onClick={() => setClosing({ id: c.id, status: 'met', note: '' })}>Met</button><button className="rfb btn-tiny" onClick={() => setClosing({ id: c.id, status: 'unmet', note: '' })}>Unmet</button></span>}
+            {closing && closing.id === c.id && <span className="act-row"><input  placeholder={closing.status === 'met' ? 'What was seen that shows it is met? (recorded)' : 'What was seen - why is it unmet? (recorded)'} value={closing.note} onChange={(e) => setClosing({ ...closing, note: e.target.value })} /><button className="rfa" onClick={() => { act((d) => setConditionStatus(d, c.id, closing.status, who, closing.note)); setClosing(null); }}>Record {closing.status}</button><button className="rfb btn-tiny" onClick={() => setClosing(null)}>Cancel</button></span>}
           </li>)}</ul>
         </>
       )}
@@ -65,7 +65,7 @@ function Visit({ v, doc, update, who, setMail, refinements, setMsg }) {
         {v.outcome === 'escalate' && <span className="bad">D4 sanctions route: conditions → suspension (mark use ceases). Record the grounds below.</span>}
       </div>
       <div className="sect">Surveillance record</div>
-      <textarea className="input" rows={3} value={v.note} onChange={(e) => update((d) => setVisitNote(d, v.key, e.target.value))} placeholder="What was sampled, what was found, conditions set and their deadlines… (the Learner feedback page copies an SV-09 note for you)" />
+      <textarea  rows={3} value={v.note} onChange={(e) => update((d) => setVisitNote(d, v.key, e.target.value))} placeholder="What was sampled, what was found, conditions set and their deadlines… (the Learner feedback page copies an SV-09 note for you)" />
     </div>
   );
 }
@@ -78,8 +78,8 @@ export default function Stage8() {
   const [mail, setMail] = useState(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
-  if (err) return <AppLayout><div className="alert alert--error">{err}</div></AppLayout>;
-  if (!doc) return <AppLayout><p className="muted">Loading…</p></AppLayout>;
+  if (err) return <AppLayout><div className="lock-note show">{err}</div></AppLayout>;
+  if (!doc) return <AppLayout><p className="purpose">Loading…</p></AppLayout>;
   const sum = row.summary || summarise(doc, refinements);
   const lock = stage8Lock(doc);
   const vs = visits(doc, refinements);
@@ -95,33 +95,31 @@ export default function Stage8() {
   };
   return (
     <AppLayout>
-      <CaseShell id={id} doc={doc} summary={sum} saveState={saveState} failed={failed}>
-        {failed && <div className="alert alert--error">{saveState} <button className="btn btn--tiny" onClick={reload}>Reload</button></div>}
+      <CaseShell id={id} doc={doc} summary={sum} refinements={refinements} saveState={saveState} failed={failed}>
+        {failed && <div className="alert alert-bad">{saveState} <button className="btn btn-tiny" onClick={reload}>Reload</button></div>}
+        <section className="stage active">
         <div className="panel">
-          <div className="page-head"><h2>Stage 8 — Surveillance &amp; renewal</h2>{vs && vs.info && <span className={'status ' + (vs.info.flag === 'overdue' ? 'bad' : (vs.info.flag === 'due' ? 'warn' : 'ok'))}>{vs.info.label}</span>}</div>
-          <p className="muted">The framework's C4 cycle: two annual surveillance visits and a renewal, all dated from the accreditation date — nothing is scheduled by hand, so a due review can never silently not exist. A visit samples the provider's pack and the current materials against the accredited version; it does not re-assess, and never the subject matter (A5).</p>
-          {lock && <div className="alert alert--error">{lock}</div>}
-          {msg && <div className="alert alert--error">{msg}</div>}
+          <div className="stage-head"><h2>Stage 8 — Surveillance &amp; renewal</h2>{vs && vs.info && <span className={'status ' + (vs.info.flag === 'overdue' ? 'bad' : (vs.info.flag === 'due' ? 'warn' : 'ok'))}>{vs.info.label}</span>}</div>
+          <p className="purpose">The framework's C4 cycle: two annual surveillance visits and a renewal, all dated from the accreditation date — nothing is scheduled by hand, so a due review can never silently not exist. A visit samples the provider's pack and the current materials against the accredited version; it does not re-assess, and never the subject matter (A5).</p>
+          {lock && <div className="lock-note show">{lock}</div>}
+          {msg && <div className="lock-note show">{msg}</div>}
         </div>
         {vs && (
           <>
-            <p className="muted">Accredited {vs.sv1 && when(vs.acc).slice(0, 12)} · reviews fall on the anniversaries · term ends {vs.renewal.expText}.</p>
+            <p className="purpose">Accredited {vs.sv1 && when(vs.acc).slice(0, 12)} · reviews fall on the anniversaries · term ends {vs.renewal.expText}.</p>
             <div className="grid2">
               <Visit v={vs.sv1} doc={doc} update={update} who={who} setMail={setMail} refinements={refinements} setMsg={setMsg} />
               <Visit v={vs.sv2} doc={doc} update={update} who={who} setMail={setMail} refinements={refinements} setMsg={setMsg} />
             </div>
             {mail && <div className="panel"><h2>Surveillance request email</h2><Mail mail={mail} setMail={setMail} /></div>}
             <div className={'panel sv-renewal' + (vs.renewal.expired ? ' overdue' : (vs.renewal.soon ? ' duesoon' : ''))}>
-              <div className="page-head"><h2>Renewal — term expires {vs.renewal.expText}</h2><span className={'status ' + (vs.renewal.expired ? 'bad' : (vs.renewal.soon ? 'warn' : 'ok'))}>{vs.renewal.expired ? 'EXPIRED ' + Math.abs(vs.renewal.days) + ' day' + (Math.abs(vs.renewal.days) === 1 ? '' : 's') + ' ago' : vs.renewal.days + ' day' + (vs.renewal.days === 1 ? '' : 's') + ' left'}</span></div>
+              <div className="stage-head"><h2>Renewal — term expires {vs.renewal.expText}</h2><span className={'status ' + (vs.renewal.expired ? 'bad' : (vs.renewal.soon ? 'warn' : 'ok'))}>{vs.renewal.expired ? 'EXPIRED ' + Math.abs(vs.renewal.days) + ' day' + (Math.abs(vs.renewal.days) === 1 ? '' : 's') + ' ago' : vs.renewal.days + ' day' + (vs.renewal.days === 1 ? '' : 's') + ' left'}</span></div>
               <p>Renewal is a full re-assessment at the current framework version — never an invoice (Part F: no auto-renewal traps; renewal is an explicit opt-in by the provider). Contact the provider around three months before expiry so a willing renewal never lapses by accident. The daily checks notify both sides at 90 days.</p>
-              <button className="btn btn--primary" disabled={busy} onClick={startRenewal}>Duplicate as renewal application →</button>
+              <button className="rfa" disabled={busy} onClick={startRenewal}>Duplicate as renewal application →</button>
             </div>
           </>
         )}
-        <div className="sf">
-          <div className="sf__v"><span className={'status ' + (sum.vcls || 'idle')}>{sum.verdict}</span></div>
-          <div className="sf__stats"><div><b>{sum.gM} / {sum.gT}</b><span>gates met</span></div><div><b>{sum.gF}</b><span>gates failing</span></div><div><b>{sum.app ? sum.pct + '%' : '–'}</b><span>scored points</span></div><div><b>{sum.ans} / {sum.app}</b><span>indicators judged</span></div></div>
-        </div>
+        </section>
       </CaseShell>
     </AppLayout>
   );
