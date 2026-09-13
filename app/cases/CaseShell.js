@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 export const STAGES = [
   { n: 1, name: 'Submission & completeness', page: true },
   { n: 2, name: 'Desk review & scoring', page: true }, { n: 3, name: 'Live verification', page: true }, { n: 4, name: 'Independent derivations', page: true },
-  { n: 5, name: 'Moderation', page: true }, { n: 6, name: 'Decision & remediation', page: true }, { n: 7, name: 'Outcome', page: true }, { n: 8, name: 'Surveillance & renewal' },
+  { n: 5, name: 'Moderation', page: true }, { n: 6, name: 'Decision & remediation', page: true }, { n: 7, name: 'Outcome', page: true }, { n: 8, name: 'Surveillance & renewal', page: true },
 ];
 
 export default function CaseShell({ id, doc, summary, saveState, failed, children }) {
