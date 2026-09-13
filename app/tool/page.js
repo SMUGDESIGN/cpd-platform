@@ -3,23 +3,24 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import AppLayout from '../AppLayout';
 
-/* The assessor tool, full-height inside the shell. Batch B replaces the
-   placeholder with the tool itself (public/tool/dashboard.html, saving through
-   /api/entries rather than the browser). */
+/* The assessor tool, framed full-height inside the shell.
+   public/assessor/dashboard.html is the eight-stage tool from the website
+   repo with its storage layer swapped: it boots from /api/store and saves
+   every case through /api/entries with the version it read (see the
+   "platform storage" block in that file). It sits behind the same login as
+   everything else - middleware.js covers /assessor/ like any other path -
+   and the frame is same-origin, which X-Frame-Options SAMEORIGIN allows.
+   Stages move out of the frame and into pages one at a time from here. */
 function ToolFrame() {
   const params = useSearchParams();
   const entry = params.get('entry');
-  return (
-    <div className="panel">
-      <h1>Assessment tool</h1>
-      <p>Arrives in the next batch: the eight-stage assessor tool, saving every case to this database{entry ? ` (opening ${entry})` : ''}.</p>
-    </div>
-  );
+  const src = '/assessor/dashboard.html' + (entry ? '?entry=' + encodeURIComponent(entry) : '');
+  return <iframe className="tool-frame" src={src} title="Assessment tool" />;
 }
 
 export default function ToolPage() {
   return (
-    <AppLayout>
+    <AppLayout wide>
       <Suspense fallback={null}><ToolFrame /></Suspense>
     </AppLayout>
   );

@@ -21,7 +21,7 @@ function useSignOutIfDead() {
   return dead;
 }
 
-export default function AppLayout({ children }) {
+export default function AppLayout({ children, wide }) {
   const { data: session } = useSession();
   const path = usePathname();
   const dead = useSignOutIfDead();
@@ -46,7 +46,7 @@ export default function AppLayout({ children }) {
           <button type="button" className="btn btn--ghost" onClick={() => signOut({ callbackUrl: '/login' })}>Sign out</button>
         </div>
       </header>
-      <main className="container" id="main-content" tabIndex={-1}>{children}</main>
+      <main className={wide ? 'container container--wide' : 'container'} id="main-content" tabIndex={-1}>{children}</main>
     </div>
   );
 }

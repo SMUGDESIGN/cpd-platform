@@ -36,6 +36,9 @@ a{color:var(--navy);}
 .topbar__user{display:flex; align-items:center; gap:12px; font-size:13.5px;}
 
 .container{width:100%; max-width:1240px; margin:0 auto; padding:26px 22px 60px;}
+/* the framed assessor tool takes the whole viewport under the top bar */
+.container--wide{max-width:none; padding:0; flex:1; display:flex; flex-direction:column;}
+.tool-frame{display:block; width:100%; height:calc(100vh - 62px); border:0; background:#fff;}
 .page-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;}
 .page-head h1{margin:0;}
 .panel{background:var(--surface); border:2px solid var(--line); padding:18px 20px; margin-bottom:16px;}
