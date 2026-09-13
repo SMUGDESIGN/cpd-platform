@@ -29,8 +29,10 @@ lifted from `~/Documents/Claude/dbf-hub/CLAUDE.md`, where each cost real time.
    assessor tool's per-entry JSON (the shape every backup file on disk has).
    Change the shape in the tool and the schema note together; never in one.
 7. Ports 3006 / 5545. The DBF Hub is 3005 / 5544 and is never touched from here.
-8. **Two houses, one database.** Internal roles (admin, assessor, moderator,
-   coordinator) and `provider` (org-scoped). Every API route names its side
+8. **Two houses, one database.** Internal roles (superadmin, support,
+   assessor, moderator, coordinator) and `provider` (org-scoped). Paul's
+   account is the superadmin. Support reads cases but never writes them
+   (`requireCaseEditor`) and never touches a superadmin account. Every API route names its side
    with `requireInternal` / `requireAdmin` / `requireProvider`; a provider
    query is ALWAYS scoped by `org_id` from the session, never from the
    request. What a provider may see is decided in ONE place,
