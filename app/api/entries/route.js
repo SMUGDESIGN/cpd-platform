@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { getSession, unauthorised, forbidden } from '@/lib/session';
-import { canEditCases } from '@/lib/permissions';
+import { requireInternal } from '@/lib/session';
 
 /* The caseload. Listing fields only - the document itself comes from
    /api/entries/[id] or, for the tool's boot, /api/store. */
 export async function GET() {
-  const session = await getSession();
-  if (!session) return unauthorised();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const { rows } = await query(
     `SELECT e.id, e.ref, e.activity, e.provider, e.summary, e.framework, e.version,
             e.updated_at, u.name AS updated_by_name
@@ -22,9 +21,8 @@ export async function GET() {
    tool's own if it sends one (so an imported JSON file keeps its identity),
    else minted here in the same shape. */
 export async function POST(req) {
-  const session = await getSession();
-  if (!session) return unauthorised();
-  if (!canEditCases(session)) return forbidden();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const body = await req.json().catch(() => null);
   const doc = body?.doc;
   if (!doc || typeof doc !== 'object' || typeof doc.caseInfo !== 'object') {

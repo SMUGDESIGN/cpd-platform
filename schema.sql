@@ -98,3 +98,93 @@ CREATE TABLE IF NOT EXISTS settings (
   value JSONB NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- ---------------------------------------------------------------------------
+-- PROVIDERS (added 13 Sep 2026 - the provider portal).
+--
+-- An organisation is a provider: the company whose courses are assessed. Its
+-- people sign in with role 'provider' and see ONLY their own rows (every
+-- portal query is scoped by users.org_id). Internal staff have no org_id.
+CREATE TABLE IF NOT EXISTS organisations (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  contact_name TEXT,
+  contact_email TEXT,
+  phone TEXT,
+  address TEXT,
+  website TEXT,
+  status TEXT NOT NULL DEFAULT 'active',   -- 'active' | 'suspended' | 'closed'
+  notes TEXT,                              -- internal, never shown to the provider
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS org_id INTEGER REFERENCES organisations(id);
+CREATE INDEX IF NOT EXISTS idx_users_org ON users(org_id);
+-- Which provider a case belongs to. NULL on cases opened inside the tool
+-- before the portal existed; assign them from the organisation's page.
+ALTER TABLE entries ADD COLUMN IF NOT EXISTS org_id INTEGER REFERENCES organisations(id);
+CREATE INDEX IF NOT EXISTS idx_entries_org ON entries(org_id);
+
+-- Reference numbers: CA-<year>-<nnnn> for applications, INV-<year>-<nnnn> for
+-- invoices - one counter per kind per year (lib/refs.server.js).
+CREATE TABLE IF NOT EXISTS ref_counters (
+  kind TEXT NOT NULL,
+  year INTEGER NOT NULL,
+  last INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (kind, year)
+);
+
+-- What a provider did in the portal - submitted, said an item was sent, said
+-- a fix was done, acknowledged feedback. The assessor's side of the story
+-- is in the case document; this is the provider's, dated and named.
+CREATE TABLE IF NOT EXISTS portal_events (
+  id SERIAL PRIMARY KEY,
+  org_id INTEGER NOT NULL REFERENCES organisations(id),
+  entry_id TEXT REFERENCES entries(id) ON DELETE SET NULL,
+  kind TEXT NOT NULL,          -- 'submitted' | 'items_sent' | 'fix_reported' | 'feedback_ack'
+  message TEXT,
+  by_user INTEGER REFERENCES users(id),
+  at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  seen_at TIMESTAMPTZ          -- when an assessor read it
+);
+CREATE INDEX IF NOT EXISTS idx_portal_events_entry ON portal_events(entry_id, at DESC);
+CREATE INDEX IF NOT EXISTS idx_portal_events_unseen ON portal_events(seen_at) WHERE seen_at IS NULL;
+
+-- Billing: invoices the scheme raises to a provider. Payment is recorded by
+-- the scheme (bank transfer) until a card provider is wired in; the provider
+-- sees every invoice and the balance. Amounts in pence, never floats.
+CREATE TABLE IF NOT EXISTS invoices (
+  id SERIAL PRIMARY KEY,
+  org_id INTEGER NOT NULL REFERENCES organisations(id),
+  entry_id TEXT REFERENCES entries(id) ON DELETE SET NULL,
+  number TEXT UNIQUE NOT NULL,             -- INV-<year>-<nnnn>
+  description TEXT NOT NULL,
+  amount_pence INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'issued',   -- 'issued' | 'paid' | 'void'
+  issued_at DATE NOT NULL DEFAULT CURRENT_DATE,
+  due_at DATE,
+  paid_at DATE,
+  notes TEXT,
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_invoices_org ON invoices(org_id);
+
+-- Feedback shared with a provider: the scheme's plain-English note on how an
+-- accredited activity is looking in learner feedback, with a RAG and the
+-- numbers it rests on, and the provider's acknowledgement. Raised by a person
+-- at the scheme, never automatically - sharing is a decision.
+CREATE TABLE IF NOT EXISTS feedback_notices (
+  id SERIAL PRIMARY KEY,
+  org_id INTEGER NOT NULL REFERENCES organisations(id),
+  entry_id TEXT REFERENCES entries(id) ON DELETE SET NULL,
+  rag TEXT NOT NULL DEFAULT 'amber',       -- 'green' | 'amber' | 'red'
+  message TEXT NOT NULL,
+  snapshot JSONB,                          -- the aggregate the note rests on, as shared
+  created_by INTEGER REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  acknowledged_at TIMESTAMPTZ,
+  acknowledged_by INTEGER REFERENCES users(id),
+  response TEXT                            -- what the provider said they will do
+);
+CREATE INDEX IF NOT EXISTS idx_feedback_notices_org ON feedback_notices(org_id, created_at DESC);

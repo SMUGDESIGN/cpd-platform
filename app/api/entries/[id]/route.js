@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { getSession, unauthorised, forbidden } from '@/lib/session';
-import { canEditCases } from '@/lib/permissions';
+import { requireInternal } from '@/lib/session';
 
 export async function GET(_req, { params }) {
-  const session = await getSession();
-  if (!session) return unauthorised();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const { rows } = await query(
     `SELECT e.id, e.doc, e.summary, e.version, e.framework, e.updated_at, u.name AS updated_by_name
        FROM entries e LEFT JOIN users u ON u.id = e.updated_by
@@ -19,9 +18,8 @@ export async function GET(_req, { params }) {
    version the client READ. A stale version is refused with the current row
    so the client can show what happened rather than overwrite a colleague. */
 export async function PUT(req, { params }) {
-  const session = await getSession();
-  if (!session) return unauthorised();
-  if (!canEditCases(session)) return forbidden();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const body = await req.json().catch(() => null);
   const doc = body?.doc;
   if (!doc || typeof doc !== 'object' || typeof doc.caseInfo !== 'object') {
@@ -56,9 +54,8 @@ export async function PUT(req, { params }) {
 
 /* Archive, never delete: the row and its history stay. */
 export async function DELETE(_req, { params }) {
-  const session = await getSession();
-  if (!session) return unauthorised();
-  if (!canEditCases(session)) return forbidden();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const { rowCount } = await query(
     'UPDATE entries SET archived_at = now(), updated_by = $2 WHERE id = $1 AND archived_at IS NULL',
     [params.id, session.user.id]

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { getSession, unauthorised, forbidden } from '@/lib/session';
-import { canEditCases } from '@/lib/permissions';
+import { requireInternal } from '@/lib/session';
 
 /* The proposal queue, as the tool holds it: { id: {text, notNeeded, by, at, reason, history} }. */
 export async function GET() {
-  const session = await getSession();
-  if (!session) return unauthorised();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const { rows } = await query('SELECT id, data FROM refinements ORDER BY id');
   const refinements = {};
   rows.forEach((r) => { refinements[r.id] = r.data; });
@@ -16,9 +15,8 @@ export async function GET() {
 /* Replace the whole set: rows not in the body are removed (the tool deletes a
    refinement by leaving it out, e.g. "Restore original"). */
 export async function PUT(req) {
-  const session = await getSession();
-  if (!session) return unauthorised();
-  if (!canEditCases(session)) return forbidden();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const body = await req.json().catch(() => null);
   const refinements = body?.refinements;
   if (!refinements || typeof refinements !== 'object') {

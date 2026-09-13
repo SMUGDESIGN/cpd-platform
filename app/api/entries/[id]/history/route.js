@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { getSession, unauthorised } from '@/lib/session';
+import { requireInternal } from '@/lib/session';
 
 /* Every accepted save of a case, newest first - who and when. The audit
    trail behind a signed decision. Documents are fetched one at a time by
    ?version=N to keep the list light. */
 export async function GET(req, { params }) {
-  const session = await getSession();
-  if (!session) return unauthorised();
+  const { session, res } = await requireInternal();
+  if (res) return res;
   const url = new URL(req.url);
   const version = Number(url.searchParams.get('version'));
   if (Number.isFinite(version) && version > 0) {
