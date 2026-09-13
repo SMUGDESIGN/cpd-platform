@@ -34,6 +34,7 @@ a{color:var(--navy);}
 .topnav a.on{border-bottom-color:var(--teal);}
 .topnav a:hover{background:rgba(255,255,255,.08);}
 .topbar__user{display:flex; align-items:center; gap:12px; font-size:13.5px;}
+.topbar__me{font-weight:600; padding:6px 8px; border-bottom:3px solid transparent;} .topbar__me:hover{background:rgba(255,255,255,.08);} .topbar__me.on{border-bottom-color:var(--teal);}
 
 .container{width:100%; max-width:1240px; margin:0 auto; padding:26px 22px 60px;}
 .page-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;}

@@ -15,14 +15,12 @@ const STAFF_NAV = [
   { href: '/learner-feedback', label: 'Learner feedback' },
   { href: '/proposals', label: 'Proposals' },
   { href: '/admin', label: 'Admin', admin: true },
-  { href: '/account', label: 'Account' },
 ];
 const PROVIDER_NAV = [
   { href: '/portal', label: 'Overview', exact: true },
   { href: '/portal/apply', label: 'Apply' },
   { href: '/portal/billing', label: 'Billing' },
   { href: '/portal/feedback', label: 'Feedback' },
-  { href: '/portal/account', label: 'Account' },
 ];
 
 function useSignOutIfDead() {
@@ -66,7 +64,7 @@ export default function AppLayout({ children }) {
         </nav>
         <div className="topbar__user">
           <Bell />
-          <span>{session?.user?.name}{session?.user?.orgName ? <small className="topbar__org"> · {session.user.orgName}</small> : null}</span>
+          <Link href={provider ? '/portal/account' : '/account'} className={'topbar__me' + (path.startsWith(provider ? '/portal/account' : '/account') ? ' on' : '')} title="Your account">{session?.user?.name}{session?.user?.orgName ? <small className="topbar__org"> · {session.user.orgName}</small> : null}</Link>
           <button type="button" className="btn btn--ghost" onClick={() => signOut({ callbackUrl: '/login' })}>Sign out</button>
         </div>
       </header>
