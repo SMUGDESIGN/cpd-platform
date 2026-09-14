@@ -9,7 +9,7 @@ export async function GET() {
   const { session, res } = await requireAdmin();
   if (res) return res;
   const { rows } = await query(
-    `SELECT u.id, u.name, u.email, u.role, u.initials, u.active, u.created_at, u.org_id, o.name AS org_name,
+    `SELECT u.id, u.name, u.email, u.phone, u.role, u.initials, u.active, u.created_at, u.org_id, o.name AS org_name,
             (SELECT MAX(at) FROM login_attempts la WHERE la.email = u.email AND la.ok) AS last_login
        FROM users u LEFT JOIN organisations o ON o.id = u.org_id
       ORDER BY (u.role='provider'), (u.role='superadmin') DESC, o.name NULLS FIRST, u.name`

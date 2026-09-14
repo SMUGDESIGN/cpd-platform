@@ -3,6 +3,7 @@ import { query } from '@/lib/db';
 import { requireAdmin } from '@/lib/session';
 import { resetPassword } from '@/lib/accounts.server';
 import { INTERNAL_ROLES, canGrantRole, canTouchAccount } from '@/lib/permissions';
+import { notify } from '@/lib/notify.server';
 
 /* Change a person's role or name, deactivate or reactivate. Never delete: a
    signed decision names a person and that name must resolve for ever.
@@ -24,17 +25,32 @@ export async function PUT(req, { params }) {
     if (id === Number(session.user.id) && session.user.role === 'superadmin') return NextResponse.json({ error: 'A super admin cannot demote themselves - ask another super admin' }, { status: 400 });
     role = b.role;
   }
-  await query('UPDATE users SET role = $2, active = COALESCE($3, active), name = COALESCE(NULLIF($4,\'\'), name) WHERE id = $1',
-    [id, role, typeof b.active === 'boolean' ? b.active : null, b.name ? String(b.name).trim() : null]);
+  await query('UPDATE users SET role = $2, active = COALESCE($3, active), name = COALESCE(NULLIF($4,\'\'), name), phone = COALESCE($5, phone) WHERE id = $1',
+    [id, role, typeof b.active === 'boolean' ? b.active : null, b.name ? String(b.name).trim() : null, typeof b.phone === 'string' ? b.phone.trim().slice(0, 40) : null]);
   return NextResponse.json({ ok: true });
 }
 
-/* Reset a password: a new one-time password, returned once. */
+/* Two actions. 'reset-password': a new one-time password, returned once.
+   'message': a note to one named person - a notification in their bell,
+   emailed at once if they take email (kind 'message' is urgent), signed by
+   the sender. Anyone active can be messaged, a superadmin included: talking
+   to someone is not touching their account. */
 export async function POST(req, { params }) {
   const { session, res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);
   const b = await req.json().catch(() => ({}));
+  if (b.action === 'message') {
+    const title = String(b.title || '').trim().slice(0, 140);
+    const body = String(b.body || '').trim().slice(0, 2000);
+    if (!title) return NextResponse.json({ error: 'A subject is needed' }, { status: 400 });
+    const to = (await query('SELECT id, name, active FROM users WHERE id = $1', [id])).rows[0];
+    if (!to) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!to.active) return NextResponse.json({ error: to.name + ' is deactivated and would not see it' }, { status: 400 });
+    if (id === Number(session.user.id)) return NextResponse.json({ error: 'That is you' }, { status: 400 });
+    const n = await notify({ to: { userIds: [id] }, kind: 'message', title, body: (body ? body + '\n\n' : '') + '- ' + session.user.name + ' (' + session.user.role + ')', href: '/notifications' });
+    return NextResponse.json({ ok: true, sent: n });
+  }
   if (b.action !== 'reset-password') return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   const cur = (await query('SELECT role FROM users WHERE id = $1', [id])).rows[0];
   if (!cur) return NextResponse.json({ error: 'Not found' }, { status: 404 });

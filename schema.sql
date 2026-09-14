@@ -281,3 +281,7 @@ CREATE INDEX IF NOT EXISTS idx_email_outbox_created ON email_outbox(created_at D
 -- Billing due list can show who has been chased and when.
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS reminders INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS reminded_at TIMESTAMPTZ;
+
+-- A phone number on a person (staff and provider people alike), so support
+-- can call them; the organisation keeps its own phone as before.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
