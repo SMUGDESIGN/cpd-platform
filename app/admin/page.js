@@ -4,7 +4,7 @@ import Link from 'next/link';
 import AppLayout from '../AppLayout';
 import { gbp, when, longDay } from '../money';
 
-const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged' };
+const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent' };
 
 export default function Admin() {
   const [d, setD] = useState(null);
@@ -34,7 +34,7 @@ export default function Admin() {
   }
   return (
     <AppLayout>
-      <div className="page-head"><h1>Admin</h1><nav className="subnav"><Link href="/admin/organisations">Organisations</Link><Link href="/admin/users">People</Link><button type="button" className="btn btn--tiny" onClick={runChecks} title="Fix windows ending, conditions overdue, reviews due, invoices overdue - what the nightly job does on Vercel">Run daily checks</button></nav></div>
+      <div className="page-head"><h1>Admin</h1><nav className="subnav"><Link href="/admin/organisations">Organisations</Link><Link href="/admin/users">People</Link><Link href="/admin/billing">Billing due</Link><button type="button" className="btn btn--tiny" onClick={runChecks} title="Fix windows ending, conditions overdue, reviews due, invoices overdue - what the nightly job does on Vercel">Run daily checks</button></nav></div>
       {cron && <div className="alert alert--ok">{cron}</div>}
       {err && <div className="alert alert--error">{err}</div>}
       {d && (
@@ -43,7 +43,7 @@ export default function Admin() {
             <Link href="/admin/organisations" className="stat"><b>{d.organisations.active}</b><span>active providers{d.organisations.total !== d.organisations.active ? ' of ' + d.organisations.total : ''}</span></Link>
             <Link href="/admin/users" className="stat"><b>{d.users.providers}</b><span>provider people · {d.users.staff} staff{d.users.inactive ? ' · ' + d.users.inactive + ' inactive' : ''}</span></Link>
             <Link href="/dashboard" className="stat"><b>{d.cases.open}</b><span>open cases · {d.cases.accredited} accredited{d.cases.unassigned ? ' · ' + d.cases.unassigned + ' not linked to a provider' : ''}</span></Link>
-            <Link href="/admin/organisations" className={'stat' + (d.money.overdue ? ' bad' : '')}><b>{gbp(d.money.outstanding)}</b><span>owed to the scheme{d.money.overdue ? ' · ' + gbp(d.money.overdue) + ' overdue' : ''} · {gbp(d.money.paid_this_year)} paid this year</span></Link>
+            <Link href="/admin/billing" className={'stat' + (d.money.overdue ? ' bad' : '')}><b>{gbp(d.money.outstanding)}</b><span>owed to the scheme{d.money.overdue ? ' · ' + gbp(d.money.overdue) + ' overdue' : ''} · {gbp(d.money.paid_this_year)} paid this year</span></Link>
           </div>
           <div className="panel">
             <div className="page-head"><h2>From providers, unread ({d.unseenEvents.length})</h2>{d.unseenEvents.length > 0 && <button className="btn" onClick={() => seen(d.unseenEvents.map((e) => e.id))}>Mark all read</button>}</div>
@@ -63,7 +63,7 @@ export default function Admin() {
           )}
           {d.overdueInvoices.length > 0 && (
             <div className="panel panel--action">
-              <h2>Overdue invoices</h2>
+              <div className="page-head"><h2>Overdue invoices</h2><Link className="btn btn--tiny" href="/admin/billing">Chase from Billing due</Link></div>
               <ul className="plain">{d.overdueInvoices.map((i) => <li key={i.number}><Link href={'/admin/organisations/' + i.org_id}>{i.org_name}</Link> · {i.number} · {gbp(i.amount_pence)} · due {longDay(i.due_at)}</li>)}</ul>
             </div>
           )}

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import AppLayout from '../../../AppLayout';
 import { gbp, when, longDay } from '../../../money';
 
-const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged' };
+const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent' };
 
 export default function Organisation() {
   const { id } = useParams();
@@ -89,11 +89,12 @@ export default function Organisation() {
           <div className="panel">
             <h2>Billing · {gbp(d.owedPence)} owed</h2>
             <table className="table">
-              <thead><tr><th>Invoice</th><th>For</th><th>Case</th><th>Issued</th><th>Due</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+              <thead><tr><th>Invoice</th><th>For</th><th>Case</th><th>Issued</th><th>Due</th><th>Amount</th><th>Status</th><th>Chased</th><th></th></tr></thead>
               <tbody>
-                {!d.invoices.length && <tr><td colSpan={8} className="muted">No invoices.</td></tr>}
+                {!d.invoices.length && <tr><td colSpan={9} className="muted">No invoices.</td></tr>}
                 {d.invoices.map((i) => <tr key={i.id}><td className="ref">{i.number}</td><td>{i.description}</td><td>{(d.cases.find((c) => c.id === i.entry_id) || {}).ref || '—'}</td><td className="nowrap">{longDay(i.issued_at)}</td><td className="nowrap">{i.due_at ? longDay(i.due_at) : '—'}</td><td className="nowrap">{gbp(i.amount_pence)}</td><td><span className={'status ' + (i.status === 'paid' ? 'ok' : (i.status === 'void' ? 'idle' : 'warn'))}>{i.status}{i.paid_at ? ' ' + longDay(i.paid_at) : ''}</span></td>
-                  <td className="nowrap">{i.status === 'issued' && <><button className="btn btn--tiny" onClick={() => post('/api/admin/invoices/' + i.id, { status: 'paid' }, 'PUT')}>Mark paid</button> <button className="btn btn--tiny" onClick={() => confirm('Void ' + i.number + '?') && post('/api/admin/invoices/' + i.id, { status: 'void' }, 'PUT')}>Void</button></>}</td></tr>)}
+                  <td className="nowrap">{i.reminders ? i.reminders + '× · ' + when(i.reminded_at) : (i.status === 'issued' ? 'never' : '—')}</td>
+                  <td className="nowrap">{i.status === 'issued' && <><button className="btn btn--tiny" onClick={() => post('/api/admin/invoices/' + i.id, { action: 'remind' })}>Send reminder</button> <button className="btn btn--tiny" onClick={() => post('/api/admin/invoices/' + i.id, { status: 'paid' }, 'PUT')}>Mark paid</button> <button className="btn btn--tiny" onClick={() => confirm('Void ' + i.number + '?') && post('/api/admin/invoices/' + i.id, { status: 'void' }, 'PUT')}>Void</button></>}</td></tr>)}
               </tbody>
             </table>
             <form className="act-row" style={{ marginTop: 12 }} onSubmit={(e) => { e.preventDefault(); post('/api/admin/organisations/' + id + '/invoices', inv).then((x) => x && setInv({ description: 'Assessment fee', amount: '', dueAt: '', entryId: '' })); }}>

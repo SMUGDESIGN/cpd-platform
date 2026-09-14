@@ -274,3 +274,10 @@ CREATE TABLE IF NOT EXISTS email_outbox (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_email_outbox_created ON email_outbox(created_at DESC);
+
+-- Chasing a bill (support). A reminder is a notification to the organisation
+-- (email follows their preference) plus a portal_events row 'reminder' in
+-- the chaser's name; the invoice keeps the count and the last time so the
+-- Billing due list can show who has been chased and when.
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS reminders INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS reminded_at TIMESTAMPTZ;

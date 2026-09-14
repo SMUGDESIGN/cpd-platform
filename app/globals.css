@@ -244,3 +244,5 @@ b.bad{color:var(--bad);} b.ok{color:var(--ok);}
 .login-card .brand-words small{color:var(--ink-3);}
 .login-card h1{font-size:22px; margin-bottom:16px;}
 .login-card .muted{font-size:12.5px; margin:16px 0 0;}
+/* Billing due: an overdue row is marked on its left edge, not shouted. */
+.table tr.overdue td:first-child{box-shadow:inset 3px 0 0 var(--bad);}
