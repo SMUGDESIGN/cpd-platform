@@ -4,7 +4,7 @@ import Link from 'next/link';
 import AppLayout from '../AppLayout';
 import { gbp, when, longDay } from '../money';
 
-const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved' };
+const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved', email_confirmed: 'Sign-up email confirmed', verification_resent: 'Confirmation email re-sent' };
 
 export default function Admin() {
   const [d, setD] = useState(null);
@@ -49,13 +49,16 @@ export default function Admin() {
             <Link href="/dashboard" className="stat"><b>{d.cases.open}</b><span>open cases · {d.cases.accredited} accredited{d.cases.unassigned ? ' · ' + d.cases.unassigned + ' not linked to a provider' : ''}</span></Link>
             <Link href="/admin/billing" className={'stat' + (d.money.overdue ? ' bad' : '')}><b>{gbp(d.money.outstanding)}</b><span>owed to the scheme{d.money.overdue ? ' · ' + gbp(d.money.overdue) + ' overdue' : ''} · {gbp(d.money.paid_this_year)} paid this year</span></Link>
           </div>
-          {d.pendingSignups.length > 0 && (
-            <div className="panel panel--action">
-              <div className="page-head"><h2>Sign-ups to vet ({d.pendingSignups.length})</h2><span className="muted">From the website. Approve creates the portal login and emails it; decline closes the record.</span></div>
-              <table className="table">
-                <thead><tr><th>Organisation</th><th>Contact</th><th>Delivers</th><th>Applied</th><th></th></tr></thead>
-                <tbody>{d.pendingSignups.map((o) => <tr key={o.id}><td><Link href={'/admin/organisations/' + o.id}><b>{o.name}</b></Link>{o.website ? <span className="muted"> · {o.website}</span> : null}</td><td>{o.contact_name}<br /><span className="muted">{o.contact_email}{o.phone ? ' · ' + o.phone : ''}</span></td><td>{o.formats || '—'}</td><td className="nowrap">{when(o.applied_at)}</td><td className="nowrap"><Link className="btn btn--tiny" href={'/admin/organisations/' + o.id}>Vet</Link></td></tr>)}</tbody>
-              </table>
+          {(d.pendingSignups.length > 0 || Object.keys(d.signupAttempts || {}).some((k) => !['created', 'verified'].includes(k))) && (
+            <div className={'panel' + (d.pendingSignups.length ? ' panel--action' : '')}>
+              <div className="page-head"><h2>Sign-ups to vet ({d.pendingSignups.length})</h2><span className="muted">From the website. Approval waits for the contact to confirm their email; Approve then creates the portal login and emails it; Decline closes the record.</span></div>
+              {d.pendingSignups.length > 0 && (
+                <table className="table">
+                  <thead><tr><th>Organisation</th><th>Contact</th><th>Email</th><th>Delivers</th><th>Applied</th><th></th></tr></thead>
+                  <tbody>{d.pendingSignups.map((o) => <tr key={o.id}><td><Link href={'/admin/organisations/' + o.id}><b>{o.name}</b></Link>{o.website ? <span className="muted"> · {o.website}</span> : null}</td><td>{o.contact_name}<br /><span className="muted">{o.contact_email}{o.phone ? ' · ' + o.phone : ''}</span></td><td><span className={'status ' + (o.email_verified_at ? 'ok' : 'warn')}>{o.email_verified_at ? 'confirmed' : 'not confirmed'}</span></td><td>{o.formats || '—'}</td><td className="nowrap">{when(o.applied_at)}</td><td className="nowrap"><Link className="btn btn--tiny" href={'/admin/organisations/' + o.id}>Vet</Link></td></tr>)}</tbody>
+                </table>
+              )}
+              <p className="muted">Last 7 days at the sign-up door: {['created', 'verified', 'duplicate', 'honeypot', 'bad_token', 'bad_origin', 'rate_limited', 'invalid'].filter((k) => d.signupAttempts[k]).map((k) => k.replace('_', ' ') + ' ' + d.signupAttempts[k]).join(' · ') || 'nothing'}.</p>
             </div>
           )}
           {intake && (

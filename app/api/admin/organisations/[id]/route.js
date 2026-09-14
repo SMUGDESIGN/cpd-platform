@@ -4,6 +4,7 @@ import { requireAdmin, requireInternal } from '@/lib/session';
 import { providerView } from '@/lib/providerView';
 import { createUser } from '@/lib/accounts.server';
 import { sendEmail, render, BASE_URL } from '@/lib/email.server';
+import { newVerifyToken, payloadHash, VERIFY_DAYS } from '@/lib/signup.server';
 
 /* One provider, whole: details, people, cases (as the provider sees them and
    as the assessor sees them), invoices, feedback notices, portal events, and
@@ -25,12 +26,22 @@ export async function GET(_req, { params }) {
              LEFT JOIN users u ON u.id = pe.by_user WHERE pe.org_id = $1 ORDER BY pe.at DESC LIMIT 100`, [id]),
     query('SELECT id, ref, activity, provider FROM entries WHERE org_id IS NULL AND archived_at IS NULL ORDER BY updated_at DESC'),
   ]);
+  /* the sign-up as it was received, and whether the record still matches it */
+  let signup = null;
+  if (org.signup_audit_id) {
+    const a = (await query('SELECT id, at, payload, payload_hash, origin, user_agent FROM signup_audit WHERE id = $1', [org.signup_audit_id])).rows[0];
+    if (a) {
+      const now = { organisation: org.name, contactName: org.contact_name || '', email: (org.contact_email || '').toLowerCase(), phone: org.phone || '', website: org.website || '', about: org.about || '', formats: (org.formats || '').split(', ').filter(Boolean) };
+      signup = { at: a.at, payload: a.payload, hash: a.payload_hash, origin: a.origin, userAgent: a.user_agent, hashMatches: a.payload_hash === org.signup_hash, recordMatches: payloadHash(now) === a.payload_hash };
+    }
+  }
+  const attempts = (await query(`SELECT outcome, COUNT(*)::int AS n FROM signup_audit WHERE org_id = $1 GROUP BY outcome`, [id])).rows;
   const cases = entries.rows.map((r) => ({
     id: r.id, ref: r.ref, activity: r.activity, verdict: (r.summary || {}).verdict || 'Not started', vcls: (r.summary || {}).vcls || 'idle',
     updatedAt: r.updated_at, updatedBy: r.updated_by_name, provider: providerView(r),
   }));
   const owed = invoices.rows.filter((i) => i.status === 'issued').reduce((s, i) => s + i.amount_pence, 0);
-  return NextResponse.json({ org, users: users.rows, cases, invoices: invoices.rows, owedPence: owed, notices: notices.rows, events: events.rows, unassigned: unassigned.rows });
+  return NextResponse.json({ org, users: users.rows, cases, invoices: invoices.rows, owedPence: owed, notices: notices.rows, events: events.rows, unassigned: unassigned.rows, signup, attempts });
 }
 
 export async function PUT(req, { params }) {
@@ -63,6 +74,19 @@ export async function POST(req, { params }) {
   const org = (await query('SELECT * FROM organisations WHERE id = $1', [id])).rows[0];
   if (!org) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (org.status !== 'pending') return NextResponse.json({ error: 'Only a pending sign-up can be approved or declined' }, { status: 400 });
+  if (b.action === 'resend-verification') {
+    if (!org.contact_email) return NextResponse.json({ error: 'No contact email to send to' }, { status: 400 });
+    if (org.email_verified_at) return NextResponse.json({ error: 'That address is already confirmed' }, { status: 400 });
+    const raw = await newVerifyToken(id);
+    const { text, html } = render({
+      heading: 'Hello ' + (org.contact_name || '') + ' - please confirm this is your email address so we can register ' + org.name + ' with the CPD Accreditation Scheme.',
+      items: [{ title: 'Confirm your email', body: 'The link works once and for ' + VERIFY_DAYS + ' days.', href: '/signup/verify?t=' + raw }],
+      footer: 'If you did not sign up, ignore this email - nothing is created without this confirmation and a human check.',
+    });
+    const mail = await sendEmail({ to: org.contact_email, subject: '[CPD Accreditation] Confirm your email for ' + org.name, text, html });
+    await query('INSERT INTO portal_events (org_id, kind, message, by_user, seen_at) VALUES ($1, $2, $3, $4, now())', [id, 'verification_resent', 'Confirmation email re-sent to ' + org.contact_email + (mail.ok ? '' : ' - FAILED: ' + mail.error), session.user.id]);
+    return NextResponse.json({ ok: true, email: mail });
+  }
   if (b.action === 'decline') {
     const reason = String(b.reason || '').trim().slice(0, 1000);
     await query(`UPDATE organisations SET status = 'closed', decided_by = $2, decided_at = now(), updated_at = now(),
@@ -70,8 +94,10 @@ export async function POST(req, { params }) {
       [id, session.user.id, session.user.name, reason]);
     return NextResponse.json({ ok: true, status: 'closed' });
   }
-  if (b.action !== 'approve') return NextResponse.json({ error: 'action must be approve or decline' }, { status: 400 });
+  if (b.action !== 'approve') return NextResponse.json({ error: 'action must be approve, decline or resend-verification' }, { status: 400 });
   if (!org.contact_email || !org.contact_name) return NextResponse.json({ error: 'The organisation needs a contact name and email before it can be approved - edit it first' }, { status: 400 });
+  /* a website sign-up is approved only once the contact has confirmed the address; an organisation support created by hand has no applied_at and is not held to it */
+  if (org.applied_at && !org.email_verified_at) return NextResponse.json({ error: 'The contact has not confirmed their email yet - approval waits for that (you can re-send the confirmation)' }, { status: 400 });
   let made;
   try { made = await createUser({ name: org.contact_name, email: org.contact_email, role: 'provider', orgId: id }); }
   catch (e) { return NextResponse.json({ error: e.message }, { status: 400 }); }

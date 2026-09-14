@@ -48,9 +48,17 @@ The database is a real Postgres running from `node_modules` into `.pgdata/`.
 Deploying later means: a GitHub repo, a Vercel project, a managed Postgres
 (Neon), and `DATABASE_URL` / `NEXTAUTH_SECRET` / `NEXTAUTH_URL` set in Vercel.
 
-Organisation sign-up: the website's Apply page posts to `/api/signup` (public,
-CORS). It creates a `pending` organisation and notifies support; approval on
-the organisation's admin page creates the contact's portal login and emails
-the one-time password. Set `PUBLIC_SITE_ORIGINS` to the website's origin at
-deploy (comma list); unset, any origin may post. The website's
-`js/platform.js` holds the platform URL and must point at the live platform.
+Organisation sign-up: the website's Apply page posts to `/api/signup`. It
+creates a `pending` organisation, emails the contact a confirmation link, and
+notifies support; approval on the organisation's admin page (only after the
+contact has confirmed) creates the portal login and emails the one-time
+password. The door is hardened (`lib/signup.server.js`): Origin must match
+`PUBLIC_SITE_ORIGINS` (comma list; **set it at deploy - unset in production
+means nobody may post**; unset in development allows localhost), HTTPS is
+required in production (HSTS is sent), the form fetches a signed one-time
+token bound to its connection (3 s to 60 min, single use), every attempt is
+audited verbatim with a SHA-256 of the payload (`signup_audit`), and the
+organisation page shows the original submission and whether the record still
+matches it. Optional `SIGNUP_SECRET` signs tokens (falls back to
+`NEXTAUTH_SECRET`). The website's `js/platform.js` holds the platform URL and
+must point at the live platform.

@@ -8,8 +8,9 @@ import { getToken } from 'next-auth/jwt';
  *   verify, api/verify     the public register lookup - published fields only
  *   feedback, api/feedback the learner feedback form, gated by a real
  *                          accreditation number, never by a session
- *   api/signup             the website's organisation sign-up (creates a
- *                          pending organisation, nothing else)
+ *   api/signup, signup     the website's organisation sign-up (creates a
+ *                          pending organisation, nothing else), its one-time
+ *                          token, and the email-confirmation page
  *   _next/static, _next/image, favicon, icon, images/   build output and marks
  *
  * Each public name is bounded with (?:/|$) so that, say, /learner-feedback
@@ -31,6 +32,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    '/((?!login(?:/|$)|verify(?:/|$)|feedback(?:/|$)|api/auth(?:/|$)|api/verify(?:/|$)|api/feedback(?:/|$)|api/signup(?:/|$)|api/cron(?:/|$)|_next/static|_next/image|favicon.ico|icon.svg|images/).*)',
+    '/((?!login(?:/|$)|verify(?:/|$)|feedback(?:/|$)|api/auth(?:/|$)|api/verify(?:/|$)|api/feedback(?:/|$)|api/signup(?:/|$)|signup(?:/|$)|api/cron(?:/|$)|_next/static|_next/image|favicon.ico|icon.svg|images/).*)',
   ],
 };

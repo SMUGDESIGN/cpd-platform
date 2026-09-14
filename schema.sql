@@ -298,3 +298,43 @@ ALTER TABLE organisations ADD COLUMN IF NOT EXISTS ip_hash TEXT;
 ALTER TABLE organisations ADD COLUMN IF NOT EXISTS decided_by INTEGER REFERENCES users(id);
 ALTER TABLE organisations ADD COLUMN IF NOT EXISTS decided_at TIMESTAMPTZ;
 -- status values are now: 'pending' | 'active' | 'suspended' | 'closed'
+
+-- Sign-up hardening (14 Sep 2026). The website is static, so the browser is
+-- the only client and no secret can live there; what the platform can
+-- guarantee is recorded here.
+--   signup_tokens   one-time, short-lived form tokens: the page fetches one
+--                   on load, the POST spends it; a token is bound to the
+--                   connection that fetched it and dies after an hour.
+--   signup_audit    every attempt, verbatim, with its outcome and the SHA-256
+--                   of the canonical payload - the record support compares
+--                   the organisation against; never edited, never deleted.
+--   organisations   the hash and audit row of the submission that created
+--                   it, and the email-confirmation state: the applicant must
+--                   click a link sent to the contact address before a
+--                   sign-up can be approved (proves they control the email).
+CREATE TABLE IF NOT EXISTS signup_tokens (
+  id SERIAL PRIMARY KEY,
+  nonce_hash TEXT UNIQUE NOT NULL,
+  ip_hash TEXT NOT NULL,
+  issued_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  used_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_signup_tokens_ip ON signup_tokens(ip_hash, issued_at DESC);
+CREATE TABLE IF NOT EXISTS signup_audit (
+  id SERIAL PRIMARY KEY,
+  at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  outcome TEXT NOT NULL,        -- created | verified | duplicate | honeypot | bad_token | bad_origin | rate_limited | invalid
+  ip_hash TEXT,
+  origin TEXT,
+  user_agent TEXT,
+  payload JSONB,                -- the cleaned fields exactly as accepted (null for refused attempts that carried nothing usable)
+  payload_hash TEXT,            -- sha256 of the canonical payload
+  org_id INTEGER REFERENCES organisations(id) ON DELETE SET NULL,
+  token_id INTEGER REFERENCES signup_tokens(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_signup_audit_at ON signup_audit(at DESC);
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS signup_hash TEXT;
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS signup_audit_id INTEGER REFERENCES signup_audit(id) ON DELETE SET NULL;
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS email_verify_hash TEXT;
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS email_verify_sent_at TIMESTAMPTZ;
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;

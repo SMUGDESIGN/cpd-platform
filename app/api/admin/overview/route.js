@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/session';
 export async function GET() {
   const { session, res } = await requireAdmin();
   if (res) return res;
-  const [orgs, users, cases, money, events, overdue, pending] = await Promise.all([
+  const [orgs, users, cases, money, events, overdue, pending, signupAudit] = await Promise.all([
     query(`SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE status='active')::int AS active, COUNT(*) FILTER (WHERE status='pending')::int AS pending FROM organisations`),
     query(`SELECT COUNT(*) FILTER (WHERE role='provider')::int AS providers, COUNT(*) FILTER (WHERE role<>'provider')::int AS staff,
                   COUNT(*) FILTER (WHERE active=false)::int AS inactive FROM users`),
@@ -26,11 +26,12 @@ export async function GET() {
     query(`SELECT i.number, i.amount_pence, i.due_at, o.id AS org_id, o.name AS org_name
              FROM invoices i JOIN organisations o ON o.id = i.org_id
             WHERE i.status='issued' AND i.due_at < CURRENT_DATE ORDER BY i.due_at LIMIT 20`),
-    query(`SELECT id, name, contact_name, contact_email, phone, website, formats, about, applied_at FROM organisations WHERE status='pending' ORDER BY applied_at`),
+    query(`SELECT id, name, contact_name, contact_email, phone, website, formats, about, applied_at, email_verified_at FROM organisations WHERE status='pending' ORDER BY applied_at`),
+    query(`SELECT outcome, COUNT(*)::int AS n FROM signup_audit WHERE at > now() - interval '7 days' GROUP BY outcome`),
   ]);
   return NextResponse.json({
     me: { name: session.user.name },
     organisations: orgs.rows[0], users: users.rows[0], cases: cases.rows[0], money: money.rows[0],
-    unseenEvents: events.rows, overdueInvoices: overdue.rows, pendingSignups: pending.rows,
+    unseenEvents: events.rows, overdueInvoices: overdue.rows, pendingSignups: pending.rows, signupAttempts: Object.fromEntries(signupAudit.rows.map((r) => [r.outcome, r.n])),
   });
 }

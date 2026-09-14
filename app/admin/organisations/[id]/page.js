@@ -5,7 +5,7 @@ import Link from 'next/link';
 import AppLayout from '../../../AppLayout';
 import { gbp, when, longDay } from '../../../money';
 
-const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved' };
+const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved', email_confirmed: 'Sign-up email confirmed', verification_resent: 'Confirmation email re-sent' };
 
 export default function Organisation() {
   const { id } = useParams();
@@ -42,9 +42,18 @@ export default function Organisation() {
               <p>Applied {when(d.org.applied_at)}. Contact <b>{d.org.contact_name}</b> · {d.org.contact_email}{d.org.phone ? ' · ' + d.org.phone : ''}{d.org.website ? <> · <a href={/^https?:/.test(d.org.website) ? d.org.website : 'https://' + d.org.website} target="_blank" rel="noreferrer">{d.org.website}</a></> : null}</p>
               <p><b>Delivers:</b> {d.org.formats || 'not said'}</p>
               {d.org.about && <p><b>In their words:</b> {d.org.about}</p>}
+              <p><b>Email:</b> {d.org.email_verified_at ? <span className="status ok">confirmed {when(d.org.email_verified_at)}</span> : <><span className="status warn">not confirmed</span> <span className="muted">- sent {when(d.org.email_verify_sent_at)}; approval waits for their click.</span> <button className="btn btn--tiny" onClick={async () => { const x = await post('/api/admin/organisations/' + id, { action: 'resend-verification' }); if (x) setMsg(''); }}>Re-send confirmation</button></>}</p>
+              {d.signup && (
+                <details className="signup-audit">
+                  <summary>Original submission {when(d.signup.at)} · integrity {d.signup.hashMatches && d.signup.recordMatches ? <span className="status ok">record matches the submission</span> : (d.signup.hashMatches ? <span className="status warn">record edited since submission</span> : <span className="status bad">stored hash does not match the audit</span>)}</summary>
+                  <p className="muted">SHA-256 {d.signup.hash}{d.signup.origin ? ' · from ' + d.signup.origin : ''}</p>
+                  <table className="table table--kv"><tbody>{Object.entries(d.signup.payload || {}).map(([k, v]) => <tr key={k}><th>{k}</th><td>{Array.isArray(v) ? v.join(', ') : String(v)}</td></tr>)}</tbody></table>
+                  {d.attempts?.length > 0 && <p className="muted">Attempts logged for this organisation: {d.attempts.map((a) => a.outcome.replace('_', ' ') + ' ' + a.n).join(' · ')}.</p>}
+                </details>
+              )}
               <p className="muted">Approve makes the organisation active, creates the contact's portal login and emails them the one-time password. Decline closes the record with your reason in the internal notes - write to the applicant yourself if a reply is due.</p>
               {decline === null
-                ? <p className="act-row"><button className="btn btn--primary" onClick={async () => { const x = await post('/api/admin/organisations/' + id, { action: 'approve' }); if (x) setApproved(x); }}>Approve and create login</button><button className="btn" onClick={() => setDecline('')}>Decline</button></p>
+                ? <p className="act-row"><button className="btn btn--primary" disabled={!d.org.email_verified_at} title={d.org.email_verified_at ? '' : 'Waits for the contact to confirm their email'} onClick={async () => { const x = await post('/api/admin/organisations/' + id, { action: 'approve' }); if (x) setApproved(x); }}>Approve and create login</button><button className="btn" onClick={() => setDecline('')}>Decline</button></p>
                 : <form className="act-row" onSubmit={async (e) => { e.preventDefault(); const x = await post('/api/admin/organisations/' + id, { action: 'decline', reason: decline }); if (x) setDecline(null); }}><input className="input" placeholder="Reason (internal)" value={decline} onChange={(e) => setDecline(e.target.value)} style={{ minWidth: 320 }} autoFocus /><button className="btn btn--primary" type="submit">Confirm decline</button><button className="btn" type="button" onClick={() => setDecline(null)}>Cancel</button></form>}
             </div>
           )}
