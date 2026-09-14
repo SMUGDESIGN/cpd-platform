@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { notify } from '@/lib/notify.server';
 import { sendEmail, render } from '@/lib/email.server';
-import { gate, withCors, ipHashOf, consumeToken, audit, payloadHash, newVerifyToken, CAP_PER_DAY, VERIFY_DAYS } from '@/lib/signup.server';
+import { gate, withCors, ipHashOf, consumeToken, audit, payloadHash, newVerifyToken, clean, CAP_PER_DAY, VERIFY_DAYS } from '@/lib/signup.server';
 
 /* Public. An organisation asks to join the scheme from the website's Apply
    page. This registers the ORGANISATION only - it cannot submit an activity
@@ -15,9 +15,6 @@ import { gate, withCors, ipHashOf, consumeToken, audit, payloadHash, newVerifyTo
    'pending' with the hash of exactly what was accepted, a confirmation link
    is emailed to the contact, and support is notified. */
 const FORMATS = ['Online / e-learning course', 'Face-to-face training', 'Webinars / live online', 'Conference or event sessions', 'Coaching / mentoring programme', 'Blended programme'];
-/* strip control characters (keep newlines in free text), trim, cap length */
-const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g;
-const clean = (v, max) => String(v == null ? '' : v).replace(CONTROL, '').trim().slice(0, max);
 
 export async function OPTIONS(req) { return withCors(new NextResponse(null, { status: 204 }), req.headers.get('origin')); }
 

@@ -27,11 +27,11 @@ export async function GET() {
              FROM invoices i JOIN organisations o ON o.id = i.org_id
             WHERE i.status='issued' AND i.due_at < CURRENT_DATE ORDER BY i.due_at LIMIT 20`),
     query(`SELECT id, name, contact_name, contact_email, phone, website, formats, about, applied_at, email_verified_at FROM organisations WHERE status='pending' ORDER BY applied_at`),
-    query(`SELECT outcome, COUNT(*)::int AS n FROM signup_audit WHERE at > now() - interval '7 days' GROUP BY outcome`),
+    query(`SELECT purpose, outcome, COUNT(*)::int AS n FROM signup_audit WHERE at > now() - interval '7 days' GROUP BY purpose, outcome`),
   ]);
   return NextResponse.json({
     me: { name: session.user.name },
     organisations: orgs.rows[0], users: users.rows[0], cases: cases.rows[0], money: money.rows[0],
-    unseenEvents: events.rows, overdueInvoices: overdue.rows, pendingSignups: pending.rows, signupAttempts: Object.fromEntries(signupAudit.rows.map((r) => [r.outcome, r.n])),
+    unseenEvents: events.rows, overdueInvoices: overdue.rows, pendingSignups: pending.rows, signupAttempts: Object.fromEntries(signupAudit.rows.filter((r) => r.purpose === 'signup').map((r) => [r.outcome, r.n])), doorAttempts: signupAudit.rows,
   });
 }

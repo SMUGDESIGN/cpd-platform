@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { STAGES, FREE_TEXT } from '@/lib/feedback';
 
@@ -31,6 +31,17 @@ function Form() {
   const [done, setDone] = useState(null);
   const pills = useMemo(monthPills, []);
   const total = 5;
+  /* one-time form token from the door (lib/signup.server.js): fetched on
+     load, spent by the submission; fetched again if it went stale */
+  const token = useRef({ value: null, at: 0 });
+  const getToken = async () => {
+    const r = await fetch('/api/feedback/token', { cache: 'no-store' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'token');
+    token.current = { value: j.token, at: Date.now() };
+    return j.token;
+  };
+  useEffect(() => { getToken().catch(() => {}); }, []);
 
   async function check(r) {
     const v = String(r || ref).trim().toUpperCase();
@@ -56,9 +67,12 @@ function Form() {
   }
   async function submit(e) {
     e.preventDefault(); setErr('');
-    const res = await fetch('/api/feedback', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ref, certSerial: serial, completedOn, name, email, mayContact, answers, comments, website: '' }) });
+    let t;
+    try { t = token.current.value && Date.now() - token.current.at < 50 * 60 * 1000 ? token.current.value : await getToken(); }
+    catch (x) { setErr('Could not reach the platform - please try again.'); return; }
+    const res = await fetch('/api/feedback', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: t, ref, certSerial: serial, completedOn, name, email, mayContact, answers, comments, website: '' }) });
     const d = await res.json().catch(() => ({}));
-    if (!res.ok) { setErr(d.error || 'Could not save your feedback. Please try again.'); return; }
+    if (!res.ok) { token.current = { value: null, at: 0 }; getToken().catch(() => {}); setErr(d.error || 'Could not save your feedback. Please try again.'); return; }
     setDone(d); setStep(6); window.scrollTo(0, 0);
   }
   const Stage = ({ i }) => {

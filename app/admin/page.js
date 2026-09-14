@@ -49,7 +49,7 @@ export default function Admin() {
             <Link href="/dashboard" className="stat"><b>{d.cases.open}</b><span>open cases · {d.cases.accredited} accredited{d.cases.unassigned ? ' · ' + d.cases.unassigned + ' not linked to a provider' : ''}</span></Link>
             <Link href="/admin/billing" className={'stat' + (d.money.overdue ? ' bad' : '')}><b>{gbp(d.money.outstanding)}</b><span>owed to the scheme{d.money.overdue ? ' · ' + gbp(d.money.overdue) + ' overdue' : ''} · {gbp(d.money.paid_this_year)} paid this year</span></Link>
           </div>
-          {(d.pendingSignups.length > 0 || Object.keys(d.signupAttempts || {}).some((k) => !['created', 'verified'].includes(k))) && (
+          {(d.pendingSignups.length > 0 || (d.doorAttempts || []).some((r) => !['created', 'verified'].includes(r.outcome))) && (
             <div className={'panel' + (d.pendingSignups.length ? ' panel--action' : '')}>
               <div className="page-head"><h2>Sign-ups to vet ({d.pendingSignups.length})</h2><span className="muted">From the website. Approval waits for the contact to confirm their email; Approve then creates the portal login and emails it; Decline closes the record.</span></div>
               {d.pendingSignups.length > 0 && (
@@ -58,7 +58,7 @@ export default function Admin() {
                   <tbody>{d.pendingSignups.map((o) => <tr key={o.id}><td><Link href={'/admin/organisations/' + o.id}><b>{o.name}</b></Link>{o.website ? <span className="muted"> · {o.website}</span> : null}</td><td>{o.contact_name}<br /><span className="muted">{o.contact_email}{o.phone ? ' · ' + o.phone : ''}</span></td><td><span className={'status ' + (o.email_verified_at ? 'ok' : 'warn')}>{o.email_verified_at ? 'confirmed' : 'not confirmed'}</span></td><td>{o.formats || '—'}</td><td className="nowrap">{when(o.applied_at)}</td><td className="nowrap"><Link className="btn btn--tiny" href={'/admin/organisations/' + o.id}>Vet</Link></td></tr>)}</tbody>
                 </table>
               )}
-              <p className="muted">Last 7 days at the sign-up door: {['created', 'verified', 'duplicate', 'honeypot', 'bad_token', 'bad_origin', 'rate_limited', 'invalid'].filter((k) => d.signupAttempts[k]).map((k) => k.replace('_', ' ') + ' ' + d.signupAttempts[k]).join(' · ') || 'nothing'}.</p>
+              <p className="muted">Last 7 days at the public door: {['signup', 'feedback', 'verify'].map((p) => { const rows = (d.doorAttempts || []).filter((r) => r.purpose === p); return rows.length ? p + ' - ' + rows.map((r) => r.outcome.replace('_', ' ') + ' ' + r.n).join(', ') : null; }).filter(Boolean).join(' · ') || 'nothing'}.</p>
             </div>
           )}
           {intake && (

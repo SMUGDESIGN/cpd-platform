@@ -61,4 +61,11 @@ audited verbatim with a SHA-256 of the payload (`signup_audit`), and the
 organisation page shows the original submission and whether the record still
 matches it. Optional `SIGNUP_SECRET` signs tokens (falls back to
 `NEXTAUTH_SECRET`). The website's `js/platform.js` holds the platform URL and
-must point at the live platform.
+must point at the live platform. The learner feedback form (`/api/feedback`,
+its `/token` and `/check`) and the register lookup (`/api/verify/[ref]`) pass
+the same door: origin rule (the platform's own pages and `PUBLIC_SITE_ORIGINS`;
+a person typing the address is allowed for the read-only lookups), one-time
+tokens on the feedback POST, per-connection throttles on the lookups
+(`public_hits`), and the same audit with purpose `feedback` / `verify`. The
+website's `register.html` and `feedback.html` now use the platform, falling
+back to the bundled `js/register-db.js` only when it cannot be reached.

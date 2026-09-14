@@ -338,3 +338,19 @@ ALTER TABLE organisations ADD COLUMN IF NOT EXISTS signup_audit_id INTEGER REFER
 ALTER TABLE organisations ADD COLUMN IF NOT EXISTS email_verify_hash TEXT;
 ALTER TABLE organisations ADD COLUMN IF NOT EXISTS email_verify_sent_at TIMESTAMPTZ;
 ALTER TABLE organisations ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;
+
+-- The same door for every public route (14 Sep 2026). Tokens and the audit
+-- carry a purpose ('signup' | 'feedback'); public_hits throttles the
+-- read-only lookups (register verify, feedback course check) per connection;
+-- a feedback response keeps the audit row and hash of what was accepted.
+ALTER TABLE signup_tokens ADD COLUMN IF NOT EXISTS purpose TEXT NOT NULL DEFAULT 'signup';
+ALTER TABLE signup_audit ADD COLUMN IF NOT EXISTS purpose TEXT NOT NULL DEFAULT 'signup';
+CREATE TABLE IF NOT EXISTS public_hits (
+  id SERIAL PRIMARY KEY,
+  route TEXT NOT NULL,
+  ip_hash TEXT NOT NULL,
+  at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_public_hits ON public_hits(route, ip_hash, at DESC);
+ALTER TABLE feedback_responses ADD COLUMN IF NOT EXISTS audit_id INTEGER REFERENCES signup_audit(id) ON DELETE SET NULL;
+ALTER TABLE feedback_responses ADD COLUMN IF NOT EXISTS payload_hash TEXT;
