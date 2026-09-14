@@ -11,9 +11,19 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0; padding:0;}
-body{font-family:'Space Grotesk',system-ui,-apple-system,Segoe UI,sans-serif; font-size:15px; line-height:1.5; color:var(--ink); background:var(--paper);}
-h1{font-size:26px; margin:0 0 14px; color:var(--navy); letter-spacing:-.2px;}
-h2{font-size:18px; margin:0 0 10px; color:var(--navy);}
+/* TYPE, from the DBF Hub (Paul, 14 Sep 2026): the working surface reads in
+   Hanken Grotesk at 16px with an open line, headings at 500, the content
+   column 1140px - the settings that made the Hub easy to live in. The
+   brand face, Space Grotesk, stays on the top bar, the nav and the brand
+   lockups only. */
+@font-face{font-family:'Hanken Grotesk'; src:url('/fonts/HankenGrotesk[wght].ttf') format('truetype-variations'); font-weight:300 900; font-style:normal; font-display:swap;}
+@font-face{font-family:'Hanken Grotesk'; src:url('/fonts/HankenGrotesk-Italic[wght].ttf') format('truetype-variations'); font-weight:300 900; font-style:italic; font-display:swap;}
+:root{--font-ui:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; --font-brand:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;}
+body{font-family:var(--font-ui); font-size:16px; line-height:1.55; color:var(--ink); background:var(--paper); -webkit-font-smoothing:antialiased;}
+h1{font-size:1.875rem; font-weight:500; letter-spacing:-.01em; margin:0 0 14px; color:var(--navy);}
+h2{font-size:1.375rem; font-weight:500; letter-spacing:-.01em; margin:0 0 10px; color:var(--navy);}
+h3{font-size:1rem; font-weight:600; margin:0 0 8px; color:var(--navy);}
+.topbar, .topnav a, .brand-words, .topbar__me, .brand-lockup{font-family:var(--font-brand);}
 a{color:var(--navy);}
 .muted{color:var(--ink-3);}
 .nowrap{white-space:nowrap;}
@@ -38,13 +48,13 @@ a{color:var(--navy);}
 .topbar__user{display:flex; align-items:center; gap:12px; font-size:13.5px;}
 .topbar__me{font-weight:600; padding:6px 8px; border-bottom:3px solid transparent;} .topbar__me:hover{background:rgba(255,255,255,.08);} .topbar__me.on{border-bottom-color:var(--teal);}
 
-.container{width:100%; max-width:1240px; margin:0 auto; padding:26px 22px 60px;}
+.container{width:100%; max-width:1140px; margin:0 auto; padding:36px clamp(20px,3.4vw,48px) 80px;}
 .page-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px;}
 .page-head h1{margin:0;}
 .panel{background:var(--surface); border:2px solid var(--line); padding:18px 20px; margin-bottom:16px;}
 .panel--table{padding:0; overflow-x:auto;}
-.table{width:100%; border-collapse:collapse; font-size:13.5px;}
-.table th{text-align:left; background:var(--lilac-tint); color:var(--navy); font-size:11.5px; letter-spacing:.8px; text-transform:uppercase; padding:10px 12px; border-bottom:2px solid var(--line);}
+.table{width:100%; border-collapse:collapse; font-size:.9375rem;}
+.table th{text-align:left; background:var(--lilac-tint); color:var(--navy); font-size:.75rem; letter-spacing:.8px; text-transform:uppercase; padding:10px 12px; border-bottom:2px solid var(--line);}
 .table td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:middle;}
 .table tr:last-child td{border-bottom:0;}
 .ref{font-weight:700; color:var(--navy);}

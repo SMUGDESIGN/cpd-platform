@@ -205,7 +205,7 @@
   .tool-shell .stage-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; align-items:baseline; margin-bottom:6px;}
   .tool-shell .stage-head h2{font-size:18px;}
   .tool-shell .gate-chip{font-size:11.5px; font-weight:700; color:var(--navy); background:var(--lilac-tint); padding:4px 12px;}
-  .tool-shell .purpose{color:var(--ink-2); margin-bottom:16px; max-width:75ch; font-size:13.5px;}
+  .tool-shell .purpose{color:var(--ink-2); margin-bottom:16px; max-width:75ch; font-size:15px;}
 
   .tool-shell .ck-group{font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
     color:var(--ink-3); margin:16px 0 4px; border-bottom:1px dashed var(--line); padding-bottom:4px;}
@@ -213,7 +213,7 @@
   .tool-shell label.ck input{margin-top:2px; width:15px; height:15px; accent-color:var(--navy);}
 
   /* completeness: Yes/No per item (present vs missing). No = return to provider. */
-  .tool-shell .ck-yn{display:flex; align-items:flex-start; gap:14px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:13.5px;}
+  .tool-shell .ck-yn{display:flex; align-items:flex-start; gap:14px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:15px;}
   .tool-shell .ck-yn:last-child{border-bottom:0;}
   .tool-shell .cyn-text{flex:1; color:var(--ink); line-height:1.4;}
   /* sliding segmented capsule: one rounded track, a coloured knob slides to Yes/No.
@@ -355,7 +355,7 @@
   @media (max-width:820px){ .tool-shell .irow{grid-template-columns:80px 1fr;} .tool-shell .irow .ictl{grid-column:1/-1;}}
   .tool-shell .irow .iid{font-weight:700; color:var(--navy); font-size:13px; white-space:nowrap;}
   .tool-shell .irow .iid .mtag{display:block; font-size:10px; color:var(--warn);}
-  .tool-shell .irow .itext{font-size:13px; color:var(--ink-2);}
+  .tool-shell .irow .itext{font-size:15px; line-height:1.5; color:var(--ink-2);}
   /* rating capsule sits above the evidence field, full column width — needed for the
      4-segment Met/Partial/Not-met/N/A capsule, and kept the same for the 2-segment
      Met/Not-met gate capsule so both rating types look consistent. */
@@ -546,7 +546,7 @@
 
   /* ---- the tool's own base rules, scoped so they win inside the shell ---- */
   .tool-shell{background:var(--paper-2); color:var(--ink); line-height:1.55; font-size:15px; padding-bottom:185px; margin:-26px -22px -60px; min-height:calc(100vh - 62px);}
-  .tool-shell .wrap{max-width:1100px; margin:0 auto; padding:0 20px;}
+  .tool-shell .wrap{max-width:1140px; margin:0 auto; padding:0 clamp(20px,3.4vw,48px);}
   .tool-shell h1,.tool-shell h2,.tool-shell h3{line-height:1.15; letter-spacing:-0.02em; font-weight:700; color:var(--navy); margin:0;}
   .tool-shell .btn{font:inherit; font-weight:600; font-size:13.5px; padding:9px 16px; cursor:pointer; border:2px solid transparent; background:var(--navy); color:#fff; display:inline-flex; align-items:center; gap:6px; text-decoration:none;}
   .tool-shell .btn-teal{background:var(--teal); color:var(--navy);} .tool-shell .btn-teal:hover{background:#00AFA3;}
