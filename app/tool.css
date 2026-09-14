@@ -745,3 +745,9 @@
   .tool-shell a{text-decoration:none;} .tool-shell .case-strip{display:flex; text-decoration:none; color:var(--ink); background:var(--surface); border:2px solid var(--line);}
   .tool-shell .step{color:inherit;} .tool-shell .step:hover .num{border-color:var(--navy);}
   .tool-shell .rf-btn,.tool-shell .src-i{vertical-align:middle;}
+  /* case title row (the tool's header block is gone - the platform's top bar carries the logo) */
+  .tool-shell .case-title-row{display:flex; align-items:flex-end; justify-content:space-between; gap:14px; padding:22px 0 0;}
+  .tool-shell .case-title-row h1{font-size:21px; color:var(--navy);}
+  .tool-shell .case-title-row .save-state{color:var(--ink-3); white-space:nowrap; padding-bottom:3px;}
+  .tool-shell .case-title-row .save-state.bad{color:var(--bad); font-weight:700;}
+  .tool-shell .case-strip{margin-top:10px;}

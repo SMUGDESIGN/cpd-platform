@@ -79,7 +79,7 @@ function Form() {
   return (
     <div className="public-wrap">
       <div className="public-card public-card--wide">
-        <div className="brand-lockup"><span className="brand-mark">CPD</span><span className="brand-words">Accreditation Scheme<br /><small>Learner feedback</small></span></div>
+        <div className="brand-lockup"><img className="brand-logo brand-logo--mono" src="/images/cpd-approved-course-mono.png" alt="CPD Accreditation Scheme" /><span className="brand-words"><small>Learner feedback</small></span></div>
         {step <= total && <div className="steps">{[1, 2, 3, 4, 5].map((n) => <span key={n} className={n < step ? 'done' : (n === step ? 'now' : '')} />)}<em>Step {step} of {total}</em></div>}
         <form onSubmit={submit} noValidate>
           {step === 1 && (

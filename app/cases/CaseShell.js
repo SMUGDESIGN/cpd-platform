@@ -8,8 +8,8 @@ import { withRefinements, moderationProgress, surveillanceDates } from '@/lib/sc
 import { stage5Lock } from '@/lib/stage5';
 import { stage6Lock } from '@/lib/stage6';
 
-/* The assessor tool's frame, exactly as it was: the navy header with the
-   white logo and the case title, the compact case strip, the sticky
+/* The assessor tool's frame: the case title and save line, the compact case
+   strip, the sticky
    process-flow timeline (four phases on lilac trays, flow arrows, circular
    nodes with a progress ring and a traffic-light flag, locked stages dashed),
    and the fixed summary footer (white verdict band over the navy stats band).
@@ -62,22 +62,11 @@ export default function CaseShell({ id, doc, summary, refinements, saveState, fa
   const na = doc ? Object.keys(doc.indicators || {}).filter((k) => (doc.indicators[k] || {}).r === 'N/A').length : 0;
   return (
     <div className="tool-shell">
-      <header className="tool">
-        <div className="wrap">
-          <div className="brandwrap">
-            <img className="brand-logo" src="/images/cpd-logo-white.svg" alt="CPD Accreditation" />
-            <div><h1 id="case-title">{ci.ref || 'New entry'}{ci.activity ? ' — ' + ci.activity : ''}</h1></div>
-          </div>
-          <div className="toolbar">
-            <div className="toolbar-btns">
-              <Link href="/dashboard" className="btn btn-outline">&#9636; Caseload</Link>
-              <Link href={'/cases/' + encodeURIComponent(id) + '/stage-1'} className="btn btn-outline">Case details</Link>
-            </div>
-            <span className={'save-state' + (failed ? ' bad' : '')} id="save-state">{saveState}</span>
-          </div>
-        </div>
-      </header>
       <div className="wrap">
+        <div className="case-title-row">
+          <h1 id="case-title">{ci.ref || 'New entry'}{ci.activity ? ' — ' + ci.activity : ''}</h1>
+          <span className={'save-state' + (failed ? ' bad' : '')} id="save-state">{saveState}</span>
+        </div>
         <Link href={'/cases/' + encodeURIComponent(id) + '/stage-1'} className={'case-strip' + (filled ? '' : ' empty')} id="case-strip" title="Click to edit case details">
           {filled ? (<>
             <span className="cs-ref">{ci.ref || '(no ref)'}</span>

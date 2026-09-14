@@ -28,10 +28,7 @@ function LoginForm() {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <div className="brand-lockup">
-          <span className="brand-mark">CPD</span>
-          <span className="brand-words">Accreditation Scheme<br /><small>Assessor platform</small></span>
-        </div>
+        <div className="brand-lockup"><img className="brand-logo brand-logo--mono" src="/images/cpd-approved-course-mono.png" alt="CPD Accreditation Scheme" /></div>
         <h1>Sign in</h1>
         <form onSubmit={handleSubmit}>
           <div className="field">

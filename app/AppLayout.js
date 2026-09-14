@@ -55,9 +55,8 @@ export default function AppLayout({ children }) {
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="topbar">
-        <Link href={provider ? '/portal' : '/dashboard'} className="brand-lockup brand-lockup--bar">
-          <span className="brand-mark">CPD</span>
-          <span className="brand-words">Accreditation Scheme <small>{provider ? 'Provider portal' : (role === 'superadmin' ? 'Super admin' : 'Assessor platform')}</small></span>
+        <Link href={provider ? '/portal' : '/dashboard'} className="brand-lockup brand-lockup--bar" title="CPD Accreditation Scheme">
+          <img className="brand-logo" src="/images/cpd-logo-white.svg" alt="CPD Accreditation" />
         </Link>
         <nav className="topnav" aria-label="Main">
           {nav.map((n) => <Link key={n.href} href={n.href} className={on(n) ? 'on' : ''}>{n.label}</Link>)}

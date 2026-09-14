@@ -14,7 +14,7 @@ export default function Verify() {
   return (
     <div className="public-wrap">
       <div className="public-card">
-        <div className="brand-lockup"><span className="brand-mark">CPD</span><span className="brand-words">Accreditation Scheme<br /><small>Register</small></span></div>
+        <div className="brand-lockup"><img className="brand-logo brand-logo--mono" src="/images/cpd-approved-course-mono.png" alt="CPD Accreditation Scheme" /><span className="brand-words"><small>Register</small></span></div>
         <h1>Verify an accreditation</h1>
         <p>Enter the number from a certificate or a course badge.</p>
         <form onSubmit={check} className="act-row">
