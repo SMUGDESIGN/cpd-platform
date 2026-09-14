@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { caseScope } from '@/lib/permissions';
 import { stage1Status, stage1Progress } from '@/lib/stage1';
 import { stageCounts } from '@/lib/stage2';
 import { withRefinements, moderationProgress, surveillanceDates } from '@/lib/scoring';
@@ -47,11 +49,16 @@ export function stageMeta(doc, refinements, sum) {
 
 export default function CaseShell({ id, doc, summary, refinements, saveState, failed, children, approveBar }) {
   const path = usePathname() || '';
+  const { data: session } = useSession();
   const [lockNote, setLockNote] = useState('');
   const ci = doc?.caseInfo || {};
   const sum = summary || {};
   const meta = stageMeta(doc || {}, refinements || {}, sum);
   const active = Number((path.match(/stage-(\d)/) || [])[1] || 0);
+  /* A Stage-1-only role (support) reads the later stages but cannot work
+     them: the controls are inert here for clarity, and the save route
+     refuses anything outside Stage 1 regardless. */
+  const readOnly = !!session && caseScope(session) === 'stage1' && active > 1;
   useEffect(() => { if (!lockNote) return; const t = setTimeout(() => setLockNote(''), 8000); return () => clearTimeout(t); }, [lockNote]);
   const filled = ci.ref || ci.activity || ci.provider;
   const modes = [];
@@ -102,7 +109,8 @@ export default function CaseShell({ id, doc, summary, refinements, saveState, fa
           {lockNote && <div className="lock-note show" role="status">{lockNote}</div>}
         </div>
 
-        {children}
+        {readOnly && <div className="stage-readonly-note" role="status">Read only - Stage {active} is worked by the assessment team. Support runs Stage 1: the case setup, completeness and returns.</div>}
+        <div className={readOnly ? 'stage-readonly' : undefined}>{children}</div>
       </div>
 
       <div className="summary-footer" aria-live="polite">

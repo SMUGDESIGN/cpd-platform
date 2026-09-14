@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { requireInternal, requireCaseEditor } from '@/lib/session';
+import { requireInternal, requireCaseEditor, requireStage1Editor } from '@/lib/session';
+import { outsideStage1 } from '@/lib/stage1';
 import { notifyProviderOfCaseChanges } from '@/lib/caseEvents.server';
 
 export async function GET(_req, { params }) {
@@ -17,9 +18,12 @@ export async function GET(_req, { params }) {
 
 /* Save. The body carries the document, its summary, and the
    version the client READ. A stale version is refused with the current row
-   so the client can show what happened rather than overwrite a colleague. */
+   so the client can show what happened rather than overwrite a colleague.
+   A Stage-1-only role (support) is held to the Stage 1 keys: the stored
+   document is diffed against the incoming one inside the same lock and the
+   save is refused, naming the parts, if anything else moved. */
 export async function PUT(req, { params }) {
-  const { session, res } = await requireCaseEditor();
+  const { session, scope, res } = await requireStage1Editor();
   if (res) return res;
   const body = await req.json().catch(() => null);
   const doc = body?.doc;
@@ -34,6 +38,10 @@ export async function PUT(req, { params }) {
       const { rows: who } = await tx('SELECT name FROM users WHERE id = $1', [cur[0].updated_by]);
       return { status: 409, current: cur[0].version, by: who[0]?.name || null };
     }
+    if (scope === 'stage1') {
+      const moved = outsideStage1(cur[0].doc, doc);
+      if (moved.length) return { status: 403, moved };
+    }
     const next = cur[0].version + 1;
     await tx(
       `UPDATE entries SET doc = $2, summary = $3, ref = $4, activity = $5, provider = $6, framework = $7,
@@ -47,6 +55,7 @@ export async function PUT(req, { params }) {
     return { status: 200, version: next, before: cur[0].doc, orgId: cur[0].org_id, ref: doc.caseInfo.ref || cur[0].ref };
   });
   if (out.status === 404) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (out.status === 403) return NextResponse.json({ error: 'Support runs Stage 1 only - this change touched ' + out.moved.join(', ') + ', which the assessment team owns', moved: out.moved }, { status: 403 });
   if (out.status === 409) {
     return NextResponse.json({ error: 'Saved elsewhere since you opened it', current: out.current, by: out.by }, { status: 409 });
   }

@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
-import { requireCaseEditor } from '@/lib/session';
+import { requireStage1Editor } from '@/lib/session';
 import { blankDoc } from '@/lib/framework';
 import { nextRef } from '@/lib/refs.server';
 
 /* Start a case from the staff side (a provider that applied by email or on
    paper, or one not yet on the portal). Mints the reference, optionally links
    the organisation, opens blank at Stage 1. Everything else about the case is
-   set up on the Stage 1 page. */
+   set up on the Stage 1 page. Opening a case is a Stage 1 act, so support
+   may do it. */
 export async function POST(req) {
-  const { session, res } = await requireCaseEditor();
+  const { session, res } = await requireStage1Editor();
   if (res) return res;
   const b = await req.json().catch(() => ({}));
   const orgId = Number(b.orgId) > 0 ? Number(b.orgId) : null;

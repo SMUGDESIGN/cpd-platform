@@ -1,4 +1,5 @@
 'use client';
+import { STAGE1_ROLES } from '@/lib/permissions';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -32,7 +33,7 @@ export default function Dashboard() {
     fetch('/api/admin/organisations').then((r) => (r.ok ? r.json() : { organisations: [] })).then((d) => setOrgs(d.organisations || [])).catch(() => {});
   }, []);
   useEffect(() => { load(); }, [load]);
-  const canEdit = ['superadmin', 'assessor', 'moderator', 'coordinator'].includes(session?.user?.role);
+  const canEdit = STAGE1_ROLES.includes(session?.user?.role);
   const start = async (e) => {
     e.preventDefault(); setErr('');
     const r = await fetch('/api/entries/new', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(f) });

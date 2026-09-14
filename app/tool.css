@@ -751,3 +751,8 @@
   .tool-shell .case-title-row .save-state{color:var(--ink-3); white-space:nowrap; padding-bottom:3px;}
   .tool-shell .case-title-row .save-state.bad{color:var(--bad); font-weight:700;}
   .tool-shell .case-strip{margin-top:10px;}
+
+/* A Stage-1-only role looking at a later stage: inert controls, plain note. */
+.tool-shell .stage-readonly-note{margin:14px 0 4px;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--navy);background:#fff;border-radius:8px;font-size:13px;color:var(--ink)}
+.tool-shell .stage-readonly button,.tool-shell .stage-readonly input,.tool-shell .stage-readonly textarea,.tool-shell .stage-readonly select,.tool-shell .stage-readonly .cap,.tool-shell .stage-readonly .yn-controls{pointer-events:none;opacity:.72}
+.tool-shell .stage-readonly .ev-toggle,.tool-shell .stage-readonly .src-i{pointer-events:auto;opacity:1}
