@@ -5,7 +5,7 @@ import Link from 'next/link';
 import AppLayout from '../../../AppLayout';
 import { gbp, when, longDay } from '../../../money';
 
-const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent' };
+const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved' };
 
 export default function Organisation() {
   const { id } = useParams();
@@ -17,6 +17,8 @@ export default function Organisation() {
   const [inv, setInv] = useState({ description: 'Assessment fee', amount: '', dueAt: '', entryId: '' });
   const [fb, setFb] = useState({ entryId: '', rag: 'amber', message: '' });
   const [assign, setAssign] = useState('');
+  const [decline, setDecline] = useState(null); // reason text while declining
+  const [approved, setApproved] = useState(null);
   const load = useCallback(() => fetch('/api/admin/organisations/' + id).then((r) => r.json()).then((x) => { setD(x); setF({ name: x.org.name, contactName: x.org.contact_name || '', contactEmail: x.org.contact_email || '', phone: x.org.phone || '', address: x.org.address || '', website: x.org.website || '', status: x.org.status, notes: x.org.notes || '' }); }), [id]);
   useEffect(() => { load(); }, [load]);
   const post = async (url, body, method = 'POST') => {
@@ -31,8 +33,21 @@ export default function Organisation() {
       <p><Link href="/admin/organisations">← Organisations</Link></p>
       {d && f && (
         <>
-          <div className="page-head"><h1>{d.org.name}</h1><span className={'status ' + (d.org.status === 'active' ? 'ok' : 'bad')}>{d.org.status}</span></div>
+          <div className="page-head"><h1>{d.org.name}</h1><span className={'status ' + (d.org.status === 'active' ? 'ok' : (d.org.status === 'pending' ? 'warn' : 'bad'))}>{d.org.status === 'pending' ? 'awaiting vetting' : d.org.status}</span></div>
           {msg && <div className="alert alert--error">{msg}</div>}
+          {approved && <div className="alert alert--ok">Approved. Portal login created for {approved.user.email}{approved.email?.ok ? (approved.email.mode === 'log' ? ' - the login email is in the outbox (mode: log)' : ' - the login email has been sent') : ' - the login email FAILED (' + (approved.email?.error || '?') + ')'}. One-time password, shown once, in case they need it read out: <code>{approved.password}</code></div>}
+          {d.org.status === 'pending' && (
+            <div className="panel panel--action">
+              <h2>Sign-up from the website - vet it</h2>
+              <p>Applied {when(d.org.applied_at)}. Contact <b>{d.org.contact_name}</b> · {d.org.contact_email}{d.org.phone ? ' · ' + d.org.phone : ''}{d.org.website ? <> · <a href={/^https?:/.test(d.org.website) ? d.org.website : 'https://' + d.org.website} target="_blank" rel="noreferrer">{d.org.website}</a></> : null}</p>
+              <p><b>Delivers:</b> {d.org.formats || 'not said'}</p>
+              {d.org.about && <p><b>In their words:</b> {d.org.about}</p>}
+              <p className="muted">Approve makes the organisation active, creates the contact's portal login and emails them the one-time password. Decline closes the record with your reason in the internal notes - write to the applicant yourself if a reply is due.</p>
+              {decline === null
+                ? <p className="act-row"><button className="btn btn--primary" onClick={async () => { const x = await post('/api/admin/organisations/' + id, { action: 'approve' }); if (x) setApproved(x); }}>Approve and create login</button><button className="btn" onClick={() => setDecline('')}>Decline</button></p>
+                : <form className="act-row" onSubmit={async (e) => { e.preventDefault(); const x = await post('/api/admin/organisations/' + id, { action: 'decline', reason: decline }); if (x) setDecline(null); }}><input className="input" placeholder="Reason (internal)" value={decline} onChange={(e) => setDecline(e.target.value)} style={{ minWidth: 320 }} autoFocus /><button className="btn btn--primary" type="submit">Confirm decline</button><button className="btn" type="button" onClick={() => setDecline(null)}>Cancel</button></form>}
+            </div>
+          )}
           <div className="stats">
             <div className="stat"><b>{d.cases.length}</b><span>cases · {d.cases.filter((c) => c.provider.accredited).length} accredited</span></div>
             <div className={'stat' + (d.owedPence ? ' bad' : '')}><b>{gbp(d.owedPence)}</b><span>owed</span></div>
@@ -79,7 +94,7 @@ export default function Organisation() {
                   <div className="field"><label>Website</label><input className="input" value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} /></div>
                 </div>
                 <div className="field"><label>Address</label><textarea className="input" rows={2} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} /></div>
-                <div className="field"><label>Status</label><select className="input" value={f.status} onChange={(e) => setF({ ...f, status: e.target.value })}><option value="active">active</option><option value="suspended">suspended - can sign in, cannot apply</option><option value="closed">closed - cannot sign in</option></select></div>
+                <div className="field"><label>Status</label><select className="input" value={f.status} onChange={(e) => setF({ ...f, status: e.target.value })}>{f.status === 'pending' && <option value="pending">pending - awaiting vetting</option>}<option value="active">active</option><option value="suspended">suspended - can sign in, cannot apply</option><option value="closed">closed - cannot sign in</option></select></div>
                 <div className="field"><label>Internal notes (never shown to the provider)</label><textarea className="input" rows={3} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
                 <button className="btn btn--primary" type="submit">Save</button>
               </form>

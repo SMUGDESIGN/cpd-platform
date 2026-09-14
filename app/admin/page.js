@@ -4,7 +4,7 @@ import Link from 'next/link';
 import AppLayout from '../AppLayout';
 import { gbp, when, longDay } from '../money';
 
-const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent' };
+const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved' };
 
 export default function Admin() {
   const [d, setD] = useState(null);
@@ -44,11 +44,20 @@ export default function Admin() {
       {d && (
         <>
           <div className="stats">
-            <Link href="/admin/organisations" className="stat"><b>{d.organisations.active}</b><span>active providers{d.organisations.total !== d.organisations.active ? ' of ' + d.organisations.total : ''}</span></Link>
+            <Link href="/admin/organisations" className="stat"><b>{d.organisations.active}</b><span>active providers{d.organisations.total !== d.organisations.active ? ' of ' + d.organisations.total : ''}{d.organisations.pending ? ' · ' + d.organisations.pending + ' awaiting vetting' : ''}</span></Link>
             <Link href="/admin/users" className="stat"><b>{d.users.providers}</b><span>provider people · {d.users.staff} staff{d.users.inactive ? ' · ' + d.users.inactive + ' inactive' : ''}</span></Link>
             <Link href="/dashboard" className="stat"><b>{d.cases.open}</b><span>open cases · {d.cases.accredited} accredited{d.cases.unassigned ? ' · ' + d.cases.unassigned + ' not linked to a provider' : ''}</span></Link>
             <Link href="/admin/billing" className={'stat' + (d.money.overdue ? ' bad' : '')}><b>{gbp(d.money.outstanding)}</b><span>owed to the scheme{d.money.overdue ? ' · ' + gbp(d.money.overdue) + ' overdue' : ''} · {gbp(d.money.paid_this_year)} paid this year</span></Link>
           </div>
+          {d.pendingSignups.length > 0 && (
+            <div className="panel panel--action">
+              <div className="page-head"><h2>Sign-ups to vet ({d.pendingSignups.length})</h2><span className="muted">From the website. Approve creates the portal login and emails it; decline closes the record.</span></div>
+              <table className="table">
+                <thead><tr><th>Organisation</th><th>Contact</th><th>Delivers</th><th>Applied</th><th></th></tr></thead>
+                <tbody>{d.pendingSignups.map((o) => <tr key={o.id}><td><Link href={'/admin/organisations/' + o.id}><b>{o.name}</b></Link>{o.website ? <span className="muted"> · {o.website}</span> : null}</td><td>{o.contact_name}<br /><span className="muted">{o.contact_email}{o.phone ? ' · ' + o.phone : ''}</span></td><td>{o.formats || '—'}</td><td className="nowrap">{when(o.applied_at)}</td><td className="nowrap"><Link className="btn btn--tiny" href={'/admin/organisations/' + o.id}>Vet</Link></td></tr>)}</tbody>
+              </table>
+            </div>
+          )}
           {intake && (
             <div className={'panel' + (intake.some((i) => i.state === 'untouched') ? ' panel--action' : '')}>
               <div className="page-head"><h2>Intake - waiting at Stage 1 ({intake.length})</h2><span className="muted">{intake.filter((i) => i.kind === 'renewal').length} renewal{intake.filter((i) => i.kind === 'renewal').length === 1 ? '' : 's'} · {intake.filter((i) => i.source === 'portal').length} from the portal</span></div>

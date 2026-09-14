@@ -285,3 +285,16 @@ ALTER TABLE invoices ADD COLUMN IF NOT EXISTS reminded_at TIMESTAMPTZ;
 -- A phone number on a person (staff and provider people alike), so support
 -- can call them; the organisation keeps its own phone as before.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
+
+-- Organisation sign-up from the public website. A sign-up creates the
+-- organisation in status 'pending' with what it told us; support vets it and
+-- approves (status 'active', the contact's portal login is created and the
+-- one-time password emailed) or declines (status 'closed', reason in notes).
+-- No login exists until approval. ip_hash is for the per-connection cap only.
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS applied_at TIMESTAMPTZ;
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS formats TEXT;       -- what they deliver, as told on sign-up
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS about TEXT;         -- their own words on sign-up
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS ip_hash TEXT;
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS decided_by INTEGER REFERENCES users(id);
+ALTER TABLE organisations ADD COLUMN IF NOT EXISTS decided_at TIMESTAMPTZ;
+-- status values are now: 'pending' | 'active' | 'suspended' | 'closed'

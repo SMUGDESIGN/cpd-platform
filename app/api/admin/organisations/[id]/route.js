@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireAdmin, requireInternal } from '@/lib/session';
 import { providerView } from '@/lib/providerView';
+import { createUser } from '@/lib/accounts.server';
+import { sendEmail, render, BASE_URL } from '@/lib/email.server';
 
 /* One provider, whole: details, people, cases (as the provider sees them and
    as the assessor sees them), invoices, feedback notices, portal events, and
@@ -36,7 +38,7 @@ export async function PUT(req, { params }) {
   if (res) return res;
   const id = Number(params.id);
   const b = await req.json().catch(() => ({}));
-  const status = ['active', 'suspended', 'closed'].includes(b.status) ? b.status : 'active';
+  const status = ['pending', 'active', 'suspended', 'closed'].includes(b.status) ? b.status : 'active';
   const { rowCount } = await query(
     `UPDATE organisations SET name = COALESCE(NULLIF($2,''), name), contact_name = $3, contact_email = $4, phone = $5, address = $6,
             website = $7, status = $8, notes = $9, updated_at = now() WHERE id = $1`,
@@ -45,4 +47,45 @@ export async function PUT(req, { params }) {
   );
   if (!rowCount) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json({ ok: true });
+}
+
+/* Vetting a sign-up. { action: 'approve' } sets the organisation active,
+   creates the contact's portal login and emails them the one-time password
+   (the password is also returned once, for support to pass on by phone if
+   the email does not land). { action: 'decline', reason } closes it with
+   the reason in the internal notes; nothing is sent to the applicant here -
+   support writes that themselves. Only a pending organisation is vetted. */
+export async function POST(req, { params }) {
+  const { session, res } = await requireAdmin();
+  if (res) return res;
+  const id = Number(params.id);
+  const b = await req.json().catch(() => ({}));
+  const org = (await query('SELECT * FROM organisations WHERE id = $1', [id])).rows[0];
+  if (!org) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (org.status !== 'pending') return NextResponse.json({ error: 'Only a pending sign-up can be approved or declined' }, { status: 400 });
+  if (b.action === 'decline') {
+    const reason = String(b.reason || '').trim().slice(0, 1000);
+    await query(`UPDATE organisations SET status = 'closed', decided_by = $2, decided_at = now(), updated_at = now(),
+                        notes = COALESCE(notes || E'\n\n', '') || 'Sign-up declined ' || to_char(now(), 'YYYY-MM-DD') || ' by ' || $3 || CASE WHEN $4 <> '' THEN ': ' || $4 ELSE '' END WHERE id = $1`,
+      [id, session.user.id, session.user.name, reason]);
+    return NextResponse.json({ ok: true, status: 'closed' });
+  }
+  if (b.action !== 'approve') return NextResponse.json({ error: 'action must be approve or decline' }, { status: 400 });
+  if (!org.contact_email || !org.contact_name) return NextResponse.json({ error: 'The organisation needs a contact name and email before it can be approved - edit it first' }, { status: 400 });
+  let made;
+  try { made = await createUser({ name: org.contact_name, email: org.contact_email, role: 'provider', orgId: id }); }
+  catch (e) { return NextResponse.json({ error: e.message }, { status: 400 }); }
+  await query(`UPDATE organisations SET status = 'active', decided_by = $2, decided_at = now(), updated_at = now() WHERE id = $1`, [id, session.user.id]);
+  const { text, html } = render({
+    heading: 'Hello ' + org.contact_name + ' - ' + org.name + ' is now registered with the CPD Accreditation Scheme, and your portal login is ready.',
+    items: [
+      { title: 'Sign in at ' + BASE_URL + '/login', body: 'Email: ' + org.contact_email + '\nOne-time password: ' + made.password + '\nChange it under Account after your first sign-in.' },
+      { title: 'What the portal is for', body: 'Apply for accreditation of each course, webinar or programme, follow each application, reply to what we ask for, and see your invoices, your accredited activities and their review dates.', href: '/portal' },
+    ],
+    footer: 'The fee is for the assessment and is payable whatever the outcome; you receive the full framework on application. If you did not sign up, reply to this email and we will close the account.',
+  });
+  const mail = await sendEmail({ userId: made.user.id, to: org.contact_email, subject: '[CPD Accreditation] Your portal login for ' + org.name, text, html });
+  await query('INSERT INTO portal_events (org_id, kind, message, by_user, seen_at) VALUES ($1, $2, $3, $4, now())',
+    [id, 'approved', 'Sign-up approved; portal login created for ' + org.contact_name + ' (' + org.contact_email + ')' + (mail.ok ? ', login email ' + (mail.mode === 'log' ? 'logged to the outbox' : 'sent') : ', login email FAILED: ' + mail.error), session.user.id]);
+  return NextResponse.json({ ok: true, status: 'active', user: made.user, password: made.password, email: mail });
 }

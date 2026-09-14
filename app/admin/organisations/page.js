@@ -38,7 +38,7 @@ export default function Organisations() {
               <tr key={o.id}>
                 <td><Link href={'/admin/organisations/' + o.id} className="ref">{o.name}</Link></td>
                 <td>{o.contact_name || '—'}{o.contact_email ? <span className="muted"> · {o.contact_email}</span> : null}</td>
-                <td><span className={'status ' + (o.status === 'active' ? 'ok' : 'bad')}>{o.status}</span></td>
+                <td><span className={'status ' + (o.status === 'active' ? 'ok' : (o.status === 'pending' ? 'warn' : 'bad'))}>{o.status === 'pending' ? 'awaiting vetting' : o.status}</span></td>
                 <td>{o.people}</td><td>{o.cases}</td><td>{o.accredited}</td>
                 <td className="nowrap">{o.owed_pence ? <span className={o.overdue_invoices ? 'owed bad' : 'owed'}>{gbp(o.owed_pence)}{o.overdue_invoices ? ' · overdue' : ''}</span> : '—'}</td>
                 <td>{o.unseen || '—'}</td>

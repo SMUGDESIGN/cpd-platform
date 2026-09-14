@@ -47,3 +47,10 @@ Account; urgent kinds go at once, the rest in the digest.
 The database is a real Postgres running from `node_modules` into `.pgdata/`.
 Deploying later means: a GitHub repo, a Vercel project, a managed Postgres
 (Neon), and `DATABASE_URL` / `NEXTAUTH_SECRET` / `NEXTAUTH_URL` set in Vercel.
+
+Organisation sign-up: the website's Apply page posts to `/api/signup` (public,
+CORS). It creates a `pending` organisation and notifies support; approval on
+the organisation's admin page creates the contact's portal login and emails
+the one-time password. Set `PUBLIC_SITE_ORIGINS` to the website's origin at
+deploy (comma list); unset, any origin may post. The website's
+`js/platform.js` holds the platform URL and must point at the live platform.
