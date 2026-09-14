@@ -73,7 +73,7 @@ export default function Dashboard() {
                 const st = s.stages || {};
                 return (
                   <tr key={r.id}>
-                    <td><Link href={'/cases/' + encodeURIComponent(r.id)} className="ref">{r.ref || '—'}</Link></td>
+                    <td><Link href={'/cases/' + encodeURIComponent(r.id)} className="ref">{r.ref || '—'}</Link>{r.renewal_of ? <span className="status warn" style={{ marginLeft: 6 }} title={'Renewal of ' + r.renewal_of}>renewal</span> : null}</td>
                     <td>{r.activity || 'New entry'}</td>
                     <td>{r.org_name || r.provider || '—'}</td>
                     <td><div className="stages">{[1,2,3,4,5,6,7,8].map((i) => <Link key={i} href={'/cases/' + encodeURIComponent(r.id) + '/stage-' + i} className={'sq ' + (st[i] || 'none')} title={'Stage ' + i}>{i}</Link>)}</div></td>

@@ -10,7 +10,7 @@ export async function GET() {
   const { rows } = await query(
     `SELECT e.id, e.ref, e.activity, e.provider, e.summary, e.framework, e.version,
             e.updated_at, u.name AS updated_by_name, e.org_id, o.name AS org_name,
-            e.doc->'outcome' AS outcome, e.doc->'surveillance' AS surveillance
+            e.doc->'outcome' AS outcome, e.doc->'surveillance' AS surveillance, e.doc->'caseInfo'->>'renewalOf' AS renewal_of
        FROM entries e LEFT JOIN users u ON u.id = e.updated_by LEFT JOIN organisations o ON o.id = e.org_id
       WHERE e.archived_at IS NULL
       ORDER BY e.updated_at DESC`

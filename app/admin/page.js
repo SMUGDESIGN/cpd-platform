@@ -9,7 +9,11 @@ const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_repor
 export default function Admin() {
   const [d, setD] = useState(null);
   const [err, setErr] = useState('');
-  const load = useCallback(() => fetch('/api/admin/overview').then((r) => (r.ok ? r.json() : Promise.reject(r.status))).then(setD).catch((e) => setErr('Could not load (' + e + ').')), []);
+  const [intake, setIntake] = useState(null);
+  const load = useCallback(() => {
+    fetch('/api/admin/overview').then((r) => (r.ok ? r.json() : Promise.reject(r.status))).then(setD).catch((e) => setErr('Could not load (' + e + ').'));
+    fetch('/api/admin/intake').then((r) => (r.ok ? r.json() : { intake: [] })).then((x) => setIntake(x.intake || [])).catch(() => setIntake([]));
+  }, []);
   useEffect(() => { load(); }, [load]);
   async function seen(ids) { await fetch('/api/admin/events', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ids }) }); load(); }
   const [cron, setCron] = useState('');
@@ -45,6 +49,29 @@ export default function Admin() {
             <Link href="/dashboard" className="stat"><b>{d.cases.open}</b><span>open cases · {d.cases.accredited} accredited{d.cases.unassigned ? ' · ' + d.cases.unassigned + ' not linked to a provider' : ''}</span></Link>
             <Link href="/admin/billing" className={'stat' + (d.money.overdue ? ' bad' : '')}><b>{gbp(d.money.outstanding)}</b><span>owed to the scheme{d.money.overdue ? ' · ' + gbp(d.money.overdue) + ' overdue' : ''} · {gbp(d.money.paid_this_year)} paid this year</span></Link>
           </div>
+          {intake && (
+            <div className={'panel' + (intake.some((i) => i.state === 'untouched') ? ' panel--action' : '')}>
+              <div className="page-head"><h2>Intake - waiting at Stage 1 ({intake.length})</h2><span className="muted">{intake.filter((i) => i.kind === 'renewal').length} renewal{intake.filter((i) => i.kind === 'renewal').length === 1 ? '' : 's'} · {intake.filter((i) => i.source === 'portal').length} from the portal</span></div>
+              {!intake.length && <p className="muted">Nothing waiting - every open case has cleared Stage 1.</p>}
+              {intake.length > 0 && (
+                <table className="table">
+                  <thead><tr><th>Ref</th><th>Activity</th><th>Organisation</th><th>Kind</th><th>From</th><th>Lead</th><th>Stage 1</th><th>Waiting</th></tr></thead>
+                  <tbody>{intake.map((i) => (
+                    <tr key={i.id} className={i.state === 'untouched' ? 'overdue' : ''}>
+                      <td className="ref"><Link href={'/cases/' + encodeURIComponent(i.id) + '/stage-1'}>{i.ref || '(no ref)'}</Link></td>
+                      <td>{i.activity || <span className="muted">not set</span>}</td>
+                      <td>{i.org_id ? <Link href={'/admin/organisations/' + i.org_id}>{i.org_name}</Link> : (i.provider || <span className="muted">not linked</span>)}</td>
+                      <td>{i.kind === 'renewal' ? <span className="status warn" title={'Renews ' + i.renewal_of}>renewal</span> : 'application'}</td>
+                      <td>{i.source === 'portal' ? 'portal' : (i.opened_by || 'staff')}</td>
+                      <td>{i.lead || <span className="muted">unassigned</span>}</td>
+                      <td><span className={'status ' + (i.state === 'untouched' ? 'bad' : (i.state === 'with provider' ? 'idle' : 'warn'))}>{i.state}</span>{i.returns ? <span className="muted"> · {i.returns} return{i.returns === 1 ? '' : 's'}</span> : null}</td>
+                      <td className="nowrap">{i.days_waiting} day{i.days_waiting === 1 ? '' : 's'}</td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              )}
+            </div>
+          )}
           <div className="panel">
             <div className="page-head"><h2>From providers, unread ({d.unseenEvents.length})</h2>{d.unseenEvents.length > 0 && <button className="btn" onClick={() => seen(d.unseenEvents.map((e) => e.id))}>Mark all read</button>}</div>
             {!d.unseenEvents.length && <p className="muted">Nothing waiting.</p>}
