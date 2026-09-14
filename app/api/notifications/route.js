@@ -29,3 +29,11 @@ export async function PUT(req) {
   const { rowCount } = await query('UPDATE notifications SET read_at = now() WHERE user_id = $1 AND id = ANY($2::int[]) AND read_at IS NULL', [session.user.id, ids]);
   return NextResponse.json({ ok: true, count: rowCount });
 }
+
+/* Clear the already-seen ones - mine only; unread rows are never touched. */
+export async function DELETE() {
+  const session = await getSession();
+  if (!session) return unauthorised();
+  const { rowCount } = await query('DELETE FROM notifications WHERE user_id = $1 AND read_at IS NOT NULL', [session.user.id]);
+  return NextResponse.json({ ok: true, count: rowCount });
+}

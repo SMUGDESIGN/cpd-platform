@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import AppLayout from '../../../AppLayout';
+import AdminNav from '../../AdminNav';
 import { gbp, when, longDay } from '../../../money';
 
 const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved', email_confirmed: 'Sign-up email confirmed', verification_resent: 'Confirmation email re-sent' };
@@ -29,7 +30,7 @@ export default function Organisation() {
     load(); return x;
   };
   return (
-    <AppLayout>
+    <AppLayout side={<AdminNav />}>
       <p><Link href="/admin/organisations">← Organisations</Link></p>
       {d && f && (
         <>

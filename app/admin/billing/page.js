@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../AppLayout';
+import AdminNav from '../AdminNav';
 import { gbp, when, longDay } from '../../money';
 
 /* Billing due - the support desk's money screen: what is outstanding, who
@@ -28,8 +29,8 @@ export default function Billing() {
   const groups = [];
   (d?.invoices || []).forEach((i) => { let g = groups.find((x) => x.org_id === i.org_id); if (!g) { g = { org_id: i.org_id, org_name: i.org_name, contact_name: i.contact_name, contact_email: i.contact_email, phone: i.phone, rows: [] }; groups.push(g); } g.rows.push(i); });
   return (
-    <AppLayout>
-      <div className="page-head"><h1>Billing due</h1><nav className="subnav"><Link href="/admin">Admin</Link><Link href="/admin/organisations">Organisations</Link><Link href="/admin/users">People</Link></nav></div>
+    <AppLayout side={<AdminNav />}>
+      <div className="page-head"><h1>Billing due</h1></div>
       {err && <div className="alert alert--error">{err}</div>}
       {msg && <div className="alert alert--ok">{msg}</div>}
       {d && (

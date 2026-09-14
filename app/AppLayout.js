@@ -30,7 +30,9 @@ function useSignOutIfDead() {
   return dead;
 }
 
-export default function AppLayout({ children }) {
+/* `side`: an optional sidebar element (the admin area's nav) rendered to the
+   left of the content, the Hubs' layout. */
+export default function AppLayout({ children, side }) {
   const { data: session, status } = useSession();
   const path = usePathname() || '';
   const router = useRouter();
@@ -40,7 +42,7 @@ export default function AppLayout({ children }) {
 
   useEffect(() => {
     if (status !== 'authenticated') return;
-    if (provider && !path.startsWith('/portal') && !path.startsWith('/notifications')) router.replace('/portal');
+    if (provider && !path.startsWith('/portal')) router.replace('/portal');
     if (!provider && role && path.startsWith('/portal')) router.replace('/dashboard');
     if (role && role !== 'superadmin' && role !== 'support' && path.startsWith('/admin')) router.replace('/dashboard');
   }, [status, provider, role, path, router]);
@@ -68,7 +70,9 @@ export default function AppLayout({ children }) {
         </div>
       </header>
       <ViewAs />
-      <main className="container" id="main-content" tabIndex={-1}>{children}</main>
+      {side
+        ? <div className="app-body">{side}<main className="container container--beside" id="main-content" tabIndex={-1}>{children}</main></div>
+        : <main className="container" id="main-content" tabIndex={-1}>{children}</main>}
     </div>
   );
 }

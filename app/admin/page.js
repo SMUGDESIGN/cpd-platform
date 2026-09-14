@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppLayout from '../AppLayout';
+import AdminNav from './AdminNav';
 import { gbp, when, longDay } from '../money';
 
 const KIND = { submitted: 'New application', items_sent: 'Items sent', fix_reported: 'Fix reported / reply', feedback_ack: 'Feedback acknowledged', reminder: 'Invoice reminder sent', approved: 'Sign-up approved', email_confirmed: 'Sign-up email confirmed', verification_resent: 'Confirmation email re-sent' };
@@ -37,8 +38,8 @@ export default function Admin() {
     loadMail();
   }
   return (
-    <AppLayout>
-      <div className="page-head"><h1>Admin</h1><nav className="subnav"><Link href="/admin/organisations">Organisations</Link><Link href="/admin/users">People</Link><Link href="/admin/billing">Billing due</Link><button type="button" className="btn btn--tiny" onClick={runChecks} title="Fix windows ending, conditions overdue, reviews due, invoices overdue - what the nightly job does on Vercel">Run daily checks</button></nav></div>
+    <AppLayout side={<AdminNav />}>
+      <div className="page-head"><h1>Admin</h1><nav className="subnav"><button type="button" className="btn btn--tiny" onClick={runChecks} title="Fix windows ending, conditions overdue, reviews due, invoices overdue - what the nightly job does on Vercel">Run daily checks</button></nav></div>
       {cron && <div className="alert alert--ok">{cron}</div>}
       {err && <div className="alert alert--error">{err}</div>}
       {d && (
@@ -62,7 +63,7 @@ export default function Admin() {
             </div>
           )}
           {intake && (
-            <div className={'panel' + (intake.some((i) => i.state === 'untouched') ? ' panel--action' : '')}>
+            <div id="intake" className={'panel' + (intake.some((i) => i.state === 'untouched') ? ' panel--action' : '')}>
               <div className="page-head"><h2>Intake - waiting at Stage 1 ({intake.length})</h2><span className="muted">{intake.filter((i) => i.kind === 'renewal').length} renewal{intake.filter((i) => i.kind === 'renewal').length === 1 ? '' : 's'} · {intake.filter((i) => i.source === 'portal').length} from the portal</span></div>
               {!intake.length && <p className="muted">Nothing waiting - every open case has cleared Stage 1.</p>}
               {intake.length > 0 && (

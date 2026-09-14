@@ -25,7 +25,7 @@ export async function POST(req) {
   if (res) return res;
   const b = await req.json().catch(() => ({}));
   if (!INTERNAL_ROLES.includes(b.role)) return NextResponse.json({ error: 'Role must be one of ' + INTERNAL_ROLES.join(', ') }, { status: 400 });
-  if (!canGrantRole(session, b.role)) return NextResponse.json({ error: 'Only a super admin can create a ' + b.role + ' account' }, { status: 403 });
+  if (!canGrantRole(session, b.role)) return NextResponse.json({ error: 'Staff accounts are created by a super admin only' }, { status: 403 });
   try {
     const out = await createUser({ name: b.name, email: b.email, role: b.role, orgId: null });
     return NextResponse.json(out, { status: 201 });

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppLayout from '../../AppLayout';
+import AdminNav from '../AdminNav';
 import { gbp } from '../../money';
 
 export default function Organisations() {
@@ -17,8 +18,8 @@ export default function Organisations() {
     setF({ name: '', contactName: '', contactEmail: '' }); load();
   }
   return (
-    <AppLayout>
-      <div className="page-head"><h1>Organisations</h1><nav className="subnav"><Link href="/admin">Admin</Link><Link href="/admin/users">People</Link></nav></div>
+    <AppLayout side={<AdminNav />}>
+      <div className="page-head"><h1>Organisations</h1></div>
       <div className="panel">
         <h2>New provider</h2>
         <form onSubmit={create} className="act-row">
