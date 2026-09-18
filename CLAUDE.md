@@ -1,8 +1,8 @@
 # Working rules for the CPD platform repo
 
 This is the CPD Accreditation Scheme's platform (Next.js 14 + Postgres), the
-third sibling beside `../CPD` (framework, decisions, working rules) and
-`../CPD website` (the public site). **Read `../CPD/CLAUDE.md` first** - the
+third sibling beside `../cpd` (framework, decisions, working rules) and
+`../cpd-website` (the public site). **Read `../cpd/CLAUDE.md` first** - the
 user is the Standards Panel, propose don't decide, `DECISIONS.md`, plain
 hyphens. The rules below are about working in THIS repo, and every one is
 lifted from `~/Documents/Claude/dbf-hub/CLAUDE.md`, where each cost real time.
@@ -14,7 +14,7 @@ lifted from `~/Documents/Claude/dbf-hub/CLAUDE.md`, where each cost real time.
    If the port answers nothing at all, the server has simply stopped - start
    it again, with the `cd`:
    ```bash
-   cd ~/Documents/"CPD platform" && npm run dev
+   cd ~/Code/cpd-platform && npm run dev
    ```
 2. **Never an unscoped DELETE on a shared table.** The user's own case files
    are in this database. Scope every cleanup to rows this session created,
@@ -41,3 +41,11 @@ lifted from `~/Documents/Claude/dbf-hub/CLAUDE.md`, where each cost real time.
    `lib/providerView.js`: only what has been communicated, in plain English,
    no indicator ids, no scores, nothing un-notified. Add to that file, never
    around it.
+
+9. **Lives in `~/Code/`, never in iCloud.** On 18 Sep 2026 iCloud's Desktop &
+   Documents sync was switched off and `~/Documents` emptied; the repos and
+   the database were recovered from iCloud Drive into `~/Code/cpd-platform`,
+   `~/Code/cpd-website`, `~/Code/cpd`. The database is `.pgdata` in this
+   folder (`scripts/db.mjs` now uses `fileURLToPath`, so a space in a path can
+   no longer send it to a `%20` sibling folder). The originals in iCloud Drive
+   are stale copies from that day - do not work in them.

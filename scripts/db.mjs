@@ -4,10 +4,13 @@
 // changes. Port 5545: the DBF Hub holds 5544 and the two must never share.
 import EmbeddedPostgres from 'embedded-postgres';
 import net from 'node:net';
+import { fileURLToPath } from 'node:url';
 
 const PORT = 5545;
 const pg = new EmbeddedPostgres({
-  databaseDir: new URL('../.pgdata', import.meta.url).pathname,
+  /* fileURLToPath, not .pathname: a space in the folder name came out as %20 and the
+     data went to a sibling folder literally named 'CPD%20platform' (found 18 Sep 2026). */
+  databaseDir: fileURLToPath(new URL('../.pgdata', import.meta.url)),
   user: 'cpd',
   password: 'cpd',           // local-only credentials for a localhost-only socket
   port: PORT,
@@ -32,7 +35,7 @@ if (alreadyRunning) {
   process.on('SIGTERM', () => process.exit(0));
   setInterval(() => {}, 1 << 30);
 } else {
-  const fresh = !(await import('node:fs')).existsSync(new URL('../.pgdata/PG_VERSION', import.meta.url).pathname);
+  const fresh = !(await import('node:fs')).existsSync(fileURLToPath(new URL('../.pgdata/PG_VERSION', import.meta.url)));
   if (fresh) await pg.initialise();
   await pg.start();
   if (fresh) await pg.createDatabase('cpd_platform');
