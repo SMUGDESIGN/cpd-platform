@@ -49,3 +49,8 @@ lifted from `~/Documents/Claude/dbf-hub/CLAUDE.md`, where each cost real time.
    folder (`scripts/db.mjs` now uses `fileURLToPath`, so a space in a path can
    no longer send it to a `%20` sibling folder). The originals in iCloud Drive
    are stale copies from that day - do not work in them.
+10. **GitHub is the off-machine copy of the code** (since 18 Sep 2026): private
+    repos `SMUGDESIGN/cpd-platform`, `SMUGDESIGN/cpd-website`,
+    `SMUGDESIGN/cpd-framework`, over SSH (`~/.ssh/id_ed25519_github`). Push
+    after every batch commit (`git push`). The database is NOT on GitHub -
+    `.pgdata` and `.env` are ignored and must stay so.
