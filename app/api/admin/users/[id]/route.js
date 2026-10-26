@@ -9,7 +9,8 @@ import { notify } from '@/lib/notify.server';
    signed decision names a person and that name must resolve for ever.
    Nobody deactivates themselves; support cannot touch a superadmin; only a
    superadmin grants or removes a privileged role. */
-export async function PUT(req, { params }) {
+export async function PUT(req, props) {
+  const params = await props.params;
   const { session, res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);
@@ -42,7 +43,8 @@ export async function PUT(req, { params }) {
    emailed at once if they take email (kind 'message' is urgent), signed by
    the sender. Anyone active can be messaged, a superadmin included: talking
    to someone is not touching their account. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);

@@ -9,7 +9,8 @@ import { newVerifyToken, payloadHash, VERIFY_DAYS } from '@/lib/signup.server';
 /* One provider, whole: details, people, cases (as the provider sees them and
    as the assessor sees them), invoices, feedback notices, portal events, and
    the cases not yet assigned to any provider so one can be linked here. */
-export async function GET(_req, { params }) {
+export async function GET(_req, props) {
+  const params = await props.params;
   const { res } = await requireInternal();
   if (res) return res;
   const id = Number(params.id);
@@ -44,7 +45,8 @@ export async function GET(_req, { params }) {
   return NextResponse.json({ org, users: users.rows, cases, invoices: invoices.rows, owedPence: owed, notices: notices.rows, events: events.rows, unassigned: unassigned.rows, signup, attempts });
 }
 
-export async function PUT(req, { params }) {
+export async function PUT(req, props) {
+  const params = await props.params;
   const { res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);
@@ -66,7 +68,8 @@ export async function PUT(req, { params }) {
    the email does not land). { action: 'decline', reason } closes it with
    the reason in the internal notes; nothing is sent to the applicant here -
    support writes that themselves. Only a pending organisation is vetted. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);

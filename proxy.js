@@ -18,7 +18,7 @@ import { getToken } from 'next-auth/jwt';
  * 401 JSON; a signed-out page visit goes to /login with a return address.
  * Every API route also checks the session itself (lib/session.js).
  */
-export async function middleware(req) {
+export async function proxy(req) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (token) return NextResponse.next();
   const { pathname, search } = req.nextUrl;

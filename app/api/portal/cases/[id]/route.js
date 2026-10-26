@@ -9,7 +9,8 @@ async function ownRow(id, orgId) {
   return rows[0] || null;
 }
 
-export async function GET(_req, { params }) {
+export async function GET(_req, props) {
+  const params = await props.params;
   const { orgId, res } = await requireProvider();
   if (res) return res;
   const row = await ownRow(params.id, orgId);
@@ -26,7 +27,8 @@ export async function GET(_req, { params }) {
    thread, the return record), and into portal_events so nothing goes unread.
    The save bumps the document version like any other save; an open stage page
    of it as a "saved elsewhere" and reloads, which is right. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, orgId, res } = await requireProvider();
   if (res) return res;
   const b = await req.json().catch(() => ({}));

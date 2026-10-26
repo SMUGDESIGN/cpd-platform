@@ -4,7 +4,8 @@ import { requireInternal, requireCaseEditor, requireStage1Editor } from '@/lib/s
 import { outsideStage1 } from '@/lib/stage1';
 import { notifyProviderOfCaseChanges } from '@/lib/caseEvents.server';
 
-export async function GET(_req, { params }) {
+export async function GET(_req, props) {
+  const params = await props.params;
   const { session, res } = await requireInternal();
   if (res) return res;
   const { rows } = await query(
@@ -22,7 +23,8 @@ export async function GET(_req, { params }) {
    A Stage-1-only role (support) is held to the Stage 1 keys: the stored
    document is diffed against the incoming one inside the same lock and the
    save is refused, naming the parts, if anything else moved. */
-export async function PUT(req, { params }) {
+export async function PUT(req, props) {
+  const params = await props.params;
   const { session, scope, res } = await requireStage1Editor();
   if (res) return res;
   const body = await req.json().catch(() => null);
@@ -66,7 +68,8 @@ export async function PUT(req, { params }) {
 }
 
 /* Archive, never delete: the row and its history stay. */
-export async function DELETE(_req, { params }) {
+export async function DELETE(_req, props) {
+  const params = await props.params;
   const { session, res } = await requireCaseEditor();
   if (res) return res;
   const { rowCount } = await query(

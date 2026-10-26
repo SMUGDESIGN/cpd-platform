@@ -1,6 +1,6 @@
 # Working rules for the CPD platform repo
 
-This is the CPD Accreditation Scheme's platform (Next.js 14 + Postgres), the
+This is the CPD Accreditation Scheme's platform (Next.js 16 + Postgres), the
 third sibling beside `../cpd` (framework, decisions, working rules) and
 `../cpd-website` (the public site). **Read `../cpd/CLAUDE.md` first** - the
 user is the Standards Panel, propose don't decide, `DECISIONS.md`, plain

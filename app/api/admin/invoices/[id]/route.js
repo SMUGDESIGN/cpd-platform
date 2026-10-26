@@ -4,7 +4,8 @@ import { requireAdmin } from '@/lib/session';
 import { notify } from '@/lib/notify.server';
 
 /* Record a payment, or void. An invoice is never deleted. */
-export async function PUT(req, { params }) {
+export async function PUT(req, props) {
+  const params = await props.params;
   const { res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);
@@ -26,7 +27,8 @@ export async function PUT(req, { params }) {
    The organisation gets a notification (and email, by their preference), the
    org's activity log records who chased and when, and the invoice keeps the
    count. No dedupe key - every chase is a real one and each is delivered. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);

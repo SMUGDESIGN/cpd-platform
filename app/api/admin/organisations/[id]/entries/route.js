@@ -6,7 +6,8 @@ import { notify } from '@/lib/notify.server';
 /* Link a case to this provider (a case started from the staff side without
    an organisation has no owner). The case's provider name is set from the
    organisation if the document has none. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, res } = await requireInternal();
   if (res) return res;
   const id = Number(params.id);

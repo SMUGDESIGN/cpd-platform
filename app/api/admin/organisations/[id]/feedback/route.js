@@ -5,7 +5,8 @@ import { notify } from '@/lib/notify.server';
 
 /* Share feedback with a provider: a plain-English note, a RAG, and the numbers
    it rests on. A person decides to share; nothing here is automatic. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, res } = await requireInternal();
   if (res) return res;
   const id = Number(params.id);

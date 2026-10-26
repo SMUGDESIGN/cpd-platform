@@ -6,7 +6,8 @@ import { notify } from '@/lib/notify.server';
 
 /* Raise an invoice to a provider. Amount arrives in pounds from the form and
    is stored in pence. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { session, res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);

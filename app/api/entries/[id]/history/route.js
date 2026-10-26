@@ -5,7 +5,8 @@ import { requireInternal } from '@/lib/session';
 /* Every accepted save of a case, newest first - who and when. The audit
    trail behind a signed decision. Documents are fetched one at a time by
    ?version=N to keep the list light. */
-export async function GET(req, { params }) {
+export async function GET(req, props) {
+  const params = await props.params;
   const { session, res } = await requireInternal();
   if (res) return res;
   const url = new URL(req.url);

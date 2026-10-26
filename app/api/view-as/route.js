@@ -34,13 +34,13 @@ export async function POST(req) {
     if (!rows[0]) return NextResponse.json({ error: 'That organisation does not exist' }, { status: 400 });
     value = 'provider:' + orgId;
   }
-  cookies().set(COOKIE, value, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 60 * 60 * 8 });
+  (await cookies()).set(COOKIE, value, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 60 * 60 * 8 });
   return NextResponse.json({ ok: true, viewingAs: role });
 }
 
 export async function DELETE() {
   const session = await getSession();
   if (!session) return unauthorised();
-  cookies().set(COOKIE, '', { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 0 });
+  (await cookies()).set(COOKIE, '', { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 0 });
   return NextResponse.json({ ok: true });
 }

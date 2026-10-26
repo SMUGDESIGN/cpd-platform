@@ -5,7 +5,8 @@ import { createUser } from '@/lib/accounts.server';
 
 /* A provider's person. The one-time password comes back once, for the admin
    to pass on; it is never shown again. */
-export async function POST(req, { params }) {
+export async function POST(req, props) {
+  const params = await props.params;
   const { res } = await requireAdmin();
   if (res) return res;
   const id = Number(params.id);

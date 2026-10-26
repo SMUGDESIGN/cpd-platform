@@ -9,7 +9,8 @@ import { gate, withCors, overLimit, clean } from '@/lib/signup.server';
    page are all allowed) and a per-connection throttle so the register
    cannot be enumerated by trial. */
 export async function OPTIONS(req) { return withCors(new NextResponse(null, { status: 204 }), req.headers.get('origin')); }
-export async function GET(req, { params }) {
+export async function GET(req, props) {
+  const params = await props.params;
   const origin = req.headers.get('origin');
   const refused = await gate(req, { purpose: 'verify', allowNoOrigin: true });
   if (refused) return refused;
